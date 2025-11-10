@@ -1,0 +1,143 @@
+/// Servicio de API de Autenticación
+///
+/// Capa más baja de abstracción - interactúa directamente con Supabase
+///
+/// Responsabilidades:
+/// - Llamadas a Supabase Auth
+/// - Conversión de respuestas a modelos
+/// - Manejo de errores de API
+library;
+
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/config/supabase_config.dart';
+import '../../models/user_model.dart';
+
+/// Excepción personalizada para errores de autenticación
+class AuthException implements Exception {
+  final String message;
+  AuthException(this.message);
+
+  @override
+  String toString() => message;
+}
+
+class AuthApiService {
+  // ========================================
+  // CLIENTE SUPABASE
+  // ========================================
+
+  /// Cliente de Supabase
+  final SupabaseClient _supabase = SupabaseConfig.client;
+
+  // ========================================
+  // MÉTODOS PÚBLICOS
+  // ========================================
+
+  /// Obtiene el usuario actual
+  Future<UserModel?> getCurrentUser() async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) return null;
+
+      return UserModel(
+        id: user.id,
+        email: user.email ?? '',
+        nombre: user.userMetadata?['nombre'] as String? ?? '',
+      );
+    } catch (e) {
+      throw AuthException('Error al obtener usuario actual');
+    }
+  }
+
+  /// Inicia sesión
+  Future<UserModel> signIn({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await _supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      if (response.user == null) {
+        throw AuthException('Error al iniciar sesión');
+      }
+
+      return UserModel(
+        id: response.user!.id,
+        email: response.user!.email ?? '',
+        nombre: response.user!.userMetadata?['nombre'] as String? ?? '',
+      );
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      throw AuthException(_mapErrorMessage(e.toString()));
+    }
+  }
+
+  /// Registra nuevo usuario
+  Future<UserModel> signUp({
+    required String email,
+    required String password,
+    required String nombre,
+  }) async {
+    try {
+      final response = await _supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {'nombre': nombre},
+      );
+
+      if (response.user == null) {
+        throw AuthException('Error al crear usuario');
+      }
+
+      return UserModel(
+        id: response.user!.id,
+        email: response.user!.email ?? '',
+        nombre: nombre,
+      );
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      throw AuthException(_mapErrorMessage(e.toString()));
+    }
+  }
+
+  /// Cierra sesión
+  Future<void> signOut() async {
+    try {
+      await _supabase.auth.signOut();
+    } catch (e) {
+      throw AuthException('Error al cerrar sesión');
+    }
+  }
+
+  /// Envía correo de recuperación
+  Future<void> resetPassword(String email) async {
+    try {
+      await _supabase.auth.resetPasswordForEmail(email);
+    } catch (e) {
+      throw AuthException('Error al enviar correo de recuperación');
+    }
+  }
+
+  // ========================================
+  // MÉTODOS PRIVADOS
+  // ========================================
+
+  /// Mapea mensajes de error a español
+  String _mapErrorMessage(String error) {
+    if (error.contains('Invalid login credentials')) {
+      return 'Correo o contraseña incorrectos';
+    } else if (error.contains('Email not confirmed')) {
+      return 'Por favor confirma tu correo electrónico';
+    } else if (error.contains('User already registered')) {
+      return 'Este correo ya está registrado';
+    } else if (error.contains('Password')) {
+      return 'La contraseña debe tener al menos 6 caracteres';
+    }
+    return 'Error de autenticación';
+  }
+}
