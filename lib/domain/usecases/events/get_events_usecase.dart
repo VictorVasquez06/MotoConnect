@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../data/models/event_model.dart';
 import '../../../data/repositories/event_repository.dart';
-import '../../../core/utils/error_handler.dart';
 
 /// Use case para obtener la lista de eventos
 /// 
@@ -36,17 +35,26 @@ class GetEventsUseCase {
       }
 
       // Llamar al repositorio
-      final events = await _eventRepository.getEvents(
-        filters: filters,
-        limit: limit,
-        offset: offset,
+      final allEvents = await _eventRepository.getEvents();
+
+      // Aplicar filtros si es necesario
+      var filteredEvents = allEvents;
+      if (filters != null && filters.isNotEmpty) {
+        filteredEvents = _applyFilters(allEvents, filters);
+      }
+
+      // Aplicar lógica de negocio adicional
+      final sortedEvents = _sortEventsByDate(filteredEvents);
+
+      // Aplicar paginación
+      final startIndex = offset;
+      final endIndex = (startIndex + limit).clamp(0, sortedEvents.length);
+      final paginatedEvents = sortedEvents.sublist(
+        startIndex.clamp(0, sortedEvents.length),
+        endIndex,
       );
 
-      // Aplicar lógica de negocio adicional si es necesario
-      // Por ejemplo, ordenar por fecha, filtrar eventos caducados, etc.
-      final sortedEvents = _sortEventsByDate(events);
-
-      return Right(sortedEvents);
+      return Right(paginatedEvents);
     } catch (e) {
       // Manejo de errores
       return Left(_handleError(e));
@@ -74,12 +82,36 @@ class GetEventsUseCase {
     );
   }
 
+  /// Aplica filtros a la lista de eventos
+  List<EventModel> _applyFilters(
+    List<EventModel> events,
+    Map<String, dynamic> filters,
+  ) {
+    var filtered = events;
+
+    // Filtrar por estado
+    if (filters.containsKey('status')) {
+      final status = filters['status'];
+      if (status == 'upcoming') {
+        final now = DateTime.now();
+        filtered = filtered.where((e) => e.date.isAfter(now)).toList();
+      }
+    }
+
+    // Filtrar por categoría
+    if (filters.containsKey('category')) {
+      final category = filters['category'];
+      // Implementar filtrado por categoría si existe en el modelo
+    }
+
+    return filtered;
+  }
+
   /// Ordena eventos por fecha (más recientes primero)
   List<EventModel> _sortEventsByDate(List<EventModel> events) {
     final sortedList = List<EventModel>.from(events);
     sortedList.sort((a, b) {
-      if (a.date == null || b.date == null) return 0;
-      return b.date!.compareTo(a.date!);
+      return b.date.compareTo(a.date);
     });
     return sortedList;
   }

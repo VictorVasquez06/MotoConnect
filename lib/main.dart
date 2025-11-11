@@ -3,20 +3,20 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-// SCREENS - Archivos en lib/screens/
-import 'screens/splash_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/registro_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/perfil_sreen.dart'; // nota: mantiene el typo del archivo original
+// SCREENS - Archivos en lib/presentation/views/
+import 'presentation/views/auth/splash_screen.dart';
+import 'screens/login_screen.dart'; // Mantener el original
+import 'presentation/views/auth/register_screen.dart';
+import 'presentation/views/home/home_screen.dart';
+import 'presentation/views/profile/profile_screen.dart';
 
-// VIEWS - Archivos en lib/views/
-import 'views/eventos_view.dart';
-import 'views/rutas_screen.dart';
-import 'views/rutas_guardadas_screen.dart';
-import 'views/talleres_screen.dart';
-import 'views/comunidad_screen.dart';
-import 'views/map_picker_screen.dart';
+// VIEWS - Archivos en lib/presentation/views/
+import 'presentation/views/events/events_screen.dart';
+import 'presentation/views/routes/rutas_screen.dart';
+import 'presentation/views/routes/saved_routes_screen.dart';
+import 'presentation/views/talleres/talleres_screen.dart';
+import 'presentation/views/community/community_screen.dart';
+import 'presentation/views/routes/map_picker_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

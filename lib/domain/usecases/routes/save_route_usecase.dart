@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../data/models/route_model.dart';
 import '../../../data/repositories/route_repository.dart';
 import '../../../data/repositories/user_repository.dart';
@@ -50,8 +51,30 @@ class SaveRouteUseCase {
       // Aplicar reglas de negocio
       final processedData = _applyBusinessRules(routeData, currentUser.id);
 
+      // Convertir puntos a LatLng
+      final List<LatLng> puntos = [];
+      if (processedData['waypoints'] is List) {
+        for (var point in processedData['waypoints'] as List) {
+          if (point is Map) {
+            final lat = point['lat'] ?? point['latitude'];
+            final lng = point['lng'] ?? point['longitude'];
+            if (lat != null && lng != null) {
+              puntos.add(LatLng(lat.toDouble(), lng.toDouble()));
+            }
+          }
+        }
+      }
+
       // Crear ruta en el repositorio
-      final route = await _routeRepository.createRoute(processedData);
+      final route = await _routeRepository.createRoute(
+        userId: currentUser.id,
+        nombreRuta: processedData['name'] as String,
+        descripcionRuta: processedData['description'] as String?,
+        puntos: puntos,
+        distanciaKm: (processedData['distance'] as num?)?.toDouble(),
+        duracionMinutos: processedData['estimatedDuration'] as int?,
+        imagenUrl: processedData['imageUrl'] as String?,
+      );
 
       return Right(route);
     } catch (e) {
@@ -89,22 +112,16 @@ class SaveRouteUseCase {
       }
 
       // Verificar que no esté ya guardada
-      final isAlreadySaved = await _routeRepository.isRouteSavedByUser(
-        routeId: routeId,
-        userId: currentUserId,
-      );
+      final isAlreadySaved = await _routeRepository.isRouteSavedByUser(routeId, currentUserId);
 
       if (isAlreadySaved) {
         return const Left('Esta ruta ya está en tus favoritos');
       }
 
       // Guardar ruta como favorita
-      final savedRoute = await _routeRepository.saveRouteForUser(
-        routeId: routeId,
-        userId: currentUserId,
-      );
+      await _routeRepository.saveRouteForUser(routeId, currentUserId);
 
-      return Right(savedRoute);
+      return Right(route);
     } catch (e) {
       return Left(_handleError(e));
     }
@@ -148,8 +165,30 @@ class SaveRouteUseCase {
         return Left(validationResult);
       }
 
+      // Convertir puntos a LatLng
+      final List<LatLng> puntos = [];
+      if (routeData['waypoints'] is List) {
+        for (var point in routeData['waypoints'] as List) {
+          if (point is Map) {
+            final lat = point['lat'] ?? point['latitude'];
+            final lng = point['lng'] ?? point['longitude'];
+            if (lat != null && lng != null) {
+              puntos.add(LatLng(lat.toDouble(), lng.toDouble()));
+            }
+          }
+        }
+      }
+
       // Crear la nueva ruta
-      final newRoute = await _routeRepository.createRoute(routeData);
+      final newRoute = await _routeRepository.createRoute(
+        userId: currentUser.id,
+        nombreRuta: routeData['name'] as String,
+        descripcionRuta: routeData['description'] as String?,
+        puntos: puntos,
+        distanciaKm: (routeData['distance'] as num?)?.toDouble(),
+        duracionMinutos: routeData['estimatedDuration'] as int?,
+        imagenUrl: routeData['imageUrl'] as String?,
+      );
 
       return Right(newRoute);
     } catch (e) {

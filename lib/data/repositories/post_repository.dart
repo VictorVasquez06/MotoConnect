@@ -14,7 +14,6 @@ library;
 
 import '../services/api/post_api_service.dart';
 import '../models/post_model.dart';
-import '../usecases/comment_post_usecase.dart';
 
 class PostRepository {
   // ========================================
@@ -362,8 +361,8 @@ class PostRepository {
   /// [content] - Contenido del comentario
   ///
   /// Retorna:
-  /// - Comment creado
-  Future<Comment> addComment({
+  /// - CommentModel creado
+  Future<CommentModel> addComment({
     required String postId,
     required String userId,
     required String content,
@@ -385,7 +384,7 @@ class PostRepository {
   ///
   /// Retorna:
   /// - Lista de comentarios
-  Future<List<Comment>> getPostComments(String postId) async {
+  Future<List<CommentModel>> getPostComments(String postId) async {
     try {
       return await _apiService.getPostComments(postId);
     } catch (e) {
@@ -398,7 +397,7 @@ class PostRepository {
   /// [postId] - ID de la publicación
   /// [page] - Número de página
   /// [limit] - Cantidad de comentarios por página
-  Future<List<Comment>> getPostCommentsPaginated({
+  Future<List<CommentModel>> getPostCommentsPaginated({
     required String postId,
     required int page,
     int limit = 20,
@@ -438,8 +437,8 @@ class PostRepository {
   /// [content] - Nuevo contenido
   ///
   /// Retorna:
-  /// - Comment actualizado
-  Future<Comment> updateComment({
+  /// - CommentModel actualizado
+  Future<CommentModel> updateComment({
     required String commentId,
     required String userId,
     required String content,

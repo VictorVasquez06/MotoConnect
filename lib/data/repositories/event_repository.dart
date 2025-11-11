@@ -199,4 +199,137 @@ class EventRepository {
       throw Exception('Error al verificar participación: ${e.toString()}');
     }
   }
+
+  /// Busca eventos por título o ubicación
+  ///
+  /// [query] - Texto a buscar
+  ///
+  /// Retorna:
+  /// - Lista de eventos que coinciden con la búsqueda
+  Future<List<Event>> searchEvents(String query) async {
+    try {
+      if (query.trim().isEmpty) return [];
+      return await _apiService.searchEvents(query);
+    } catch (e) {
+      throw Exception('Error al buscar eventos: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene eventos pasados
+  ///
+  /// Retorna:
+  /// - Lista de eventos cuya fecha ya pasó
+  Future<List<Event>> getPastEvents() async {
+    try {
+      return await _apiService.getPastEvents();
+    } catch (e) {
+      throw Exception('Error al obtener eventos pasados: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene eventos creados por un usuario
+  ///
+  /// [userId] - ID del usuario
+  ///
+  /// Retorna:
+  /// - Lista de eventos creados por el usuario
+  Future<List<Event>> getEventsByUser(String userId) async {
+    try {
+      return await _apiService.getEventsByUser(userId);
+    } catch (e) {
+      throw Exception('Error al obtener eventos del usuario: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene eventos en los que participa un usuario
+  ///
+  /// [userId] - ID del usuario
+  ///
+  /// Retorna:
+  /// - Lista de eventos donde el usuario es participante
+  Future<List<Event>> getEventsUserJoined(String userId) async {
+    try {
+      return await _apiService.getEventsUserJoined(userId);
+    } catch (e) {
+      throw Exception(
+          'Error al obtener eventos donde participa el usuario: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene el conteo de participantes de un evento
+  ///
+  /// [eventId] - ID del evento
+  ///
+  /// Retorna:
+  /// - Cantidad de participantes confirmados
+  Future<int> getEventParticipantsCount(String eventId) async {
+    try {
+      return await _apiService.getEventParticipantsCount(eventId);
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /// Verifica si un usuario es el creador de un evento
+  ///
+  /// [eventId] - ID del evento
+  /// [userId] - ID del usuario
+  ///
+  /// Retorna:
+  /// - true si el usuario es el creador
+  Future<bool> isUserCreator(String eventId, String userId) async {
+    try {
+      return await _apiService.isUserCreator(eventId, userId);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Obtiene eventos por ubicación
+  ///
+  /// [location] - Texto de ubicación a buscar
+  ///
+  /// Retorna:
+  /// - Lista de eventos en la ubicación especificada
+  Future<List<Event>> getEventsByLocation({required String location}) async {
+    try {
+      return await _apiService.getEventsByLocation(location: location);
+    } catch (e) {
+      throw Exception('Error al obtener eventos por ubicación: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene eventos en un rango de fechas
+  ///
+  /// [startDate] - Fecha de inicio
+  /// [endDate] - Fecha de fin
+  ///
+  /// Retorna:
+  /// - Lista de eventos en el rango de fechas
+  Future<List<Event>> getEventsByDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    try {
+      return await _apiService.getEventsByDateRange(
+        startDate: startDate,
+        endDate: endDate,
+      );
+    } catch (e) {
+      throw Exception(
+          'Error al obtener eventos por rango de fechas: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene todos los eventos (alias para mantener compatibilidad)
+  ///
+  /// Retorna:
+  /// - Lista de todos los eventos
+  Future<List<Event>> getAllEvents() async {
+    try {
+      return await getEvents();
+    } catch (e) {
+      throw Exception('Error al obtener todos los eventos: ${e.toString()}');
+    }
+  }
 }

@@ -48,7 +48,7 @@ class _TalleresScreenState extends State<TalleresScreen> {
         return nombre;
       }
     } catch (e) {
-      print('Error al obtener nombre de usuario $userId: $e');
+      // Error al obtener nombre de usuario
     }
     return 'Desconocido';
   }
@@ -99,7 +99,7 @@ class _TalleresScreenState extends State<TalleresScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      print('Error al obtener talleres: $e');
+      // Error al obtener talleres
       setState(() {
         _error = "Error al cargar talleres: ${e.toString()}";
         _cargando = false;
@@ -143,7 +143,7 @@ class _TalleresScreenState extends State<TalleresScreen> {
             (tallerExistente['longitud'] as num).toDouble(),
           );
         } catch (e) {
-          print("Error parseando LatLng en modo edición (Taller): $e");
+          // Error parseando LatLng en modo edición
           selectedLatLng = null;
         }
       }
@@ -414,7 +414,7 @@ class _TalleresScreenState extends State<TalleresScreen> {
         }
         _obtenerTalleres();
       } catch (e) {
-        print("Error al guardar taller: $e");
+        // Error al guardar taller
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -465,7 +465,7 @@ class _TalleresScreenState extends State<TalleresScreen> {
           _obtenerTalleres();
         }
       } catch (e) {
-        print("Error al eliminar taller: $e");
+        // Error al eliminar taller
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Error al eliminar: ${e.toString()}")),
@@ -513,7 +513,7 @@ class _TalleresScreenState extends State<TalleresScreen> {
             SnackBar(content: Text('No se pudo abrir el mapa: $e')),
           );
         } else {
-          print('Error al abrir mapa (context no mounted): $e');
+          // Error al abrir mapa (context no mounted)
         }
       }
     } else {
@@ -526,9 +526,7 @@ class _TalleresScreenState extends State<TalleresScreen> {
           ),
         );
       } else {
-        print(
-          'No hay dirección o coordenadas para el mapa (context no mounted)',
-        );
+        // No hay dirección o coordenadas para el mapa (context no mounted)
       }
     }
   }
@@ -618,7 +616,7 @@ class _TalleresScreenState extends State<TalleresScreen> {
         );
       }
     } catch (e) {
-      print("Error al compartir taller: $e");
+      // Error al compartir taller
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -626,7 +624,7 @@ class _TalleresScreenState extends State<TalleresScreen> {
           ),
         );
       }
-    } finally {
+    } finally{
       if (mounted) setState(() => _cargando = false);
     }
   }

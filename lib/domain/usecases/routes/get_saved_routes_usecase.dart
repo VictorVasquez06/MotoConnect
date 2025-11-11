@@ -49,19 +49,23 @@ class GetSavedRoutesUseCase {
       }
 
       // Obtener rutas guardadas del repositorio
-      final savedRoutes = await _routeRepository.getSavedRoutesForUser(
-        userId: currentUserId,
-        filters: filters,
-        limit: limit,
-        offset: offset,
+      var savedRoutes = await _routeRepository.getSavedRoutesForUser(
+        currentUserId,
       );
+
+      // Aplicar filtros, límite y offset manualmente
+      if (offset != null && offset > 0) {
+        savedRoutes = savedRoutes.skip(offset).toList();
+      }
+      if (limit != null && limit > 0) {
+        savedRoutes = savedRoutes.take(limit).toList();
+      }
 
       // Si se solicita, incluir rutas creadas por el usuario
       List<RouteModel> allRoutes = savedRoutes;
       if (includeOwn) {
         final ownRoutes = await _routeRepository.getRoutesCreatedByUser(
-          userId: currentUserId,
-          filters: filters,
+          currentUserId,
         );
 
         // Combinar y eliminar duplicados
@@ -90,8 +94,7 @@ class GetSavedRoutesUseCase {
       }
 
       final routes = await _routeRepository.getRoutesCreatedByUser(
-        userId: currentUserId,
-        filters: {'status': 'active'},
+        currentUserId,
       );
 
       return Right(routes);
@@ -112,11 +115,15 @@ class GetSavedRoutesUseCase {
         return const Left('Usuario no autenticado');
       }
 
-      final routes = await _routeRepository.getSavedRoutesForUser(
-        userId: currentUserId,
-        limit: limit,
-        offset: offset,
-      );
+      var routes = await _routeRepository.getSavedRoutesForUser(currentUserId);
+
+      // Aplicar offset y limit
+      if (offset > 0) {
+        routes = routes.skip(offset).toList();
+      }
+      if (limit > 0) {
+        routes = routes.take(limit).toList();
+      }
 
       // Filtrar para excluir las creadas por el usuario
       final favoriteRoutes =
@@ -178,13 +185,11 @@ class GetSavedRoutesUseCase {
 
       // Obtener todas las rutas (sin límite para estadísticas)
       final savedRoutes = await _routeRepository.getSavedRoutesForUser(
-        userId: currentUserId,
-        limit: 1000, // Límite alto para estadísticas
-        offset: 0,
+        currentUserId,
       );
 
       final createdRoutes = await _routeRepository.getRoutesCreatedByUser(
-        userId: currentUserId,
+        currentUserId,
       );
 
       // Calcular estadísticas
@@ -214,9 +219,7 @@ class GetSavedRoutesUseCase {
 
       // Obtener todas las rutas guardadas
       final routes = await _routeRepository.getSavedRoutesForUser(
-        userId: currentUserId,
-        limit: 100, // Límite razonable para búsqueda
-        offset: 0,
+        currentUserId,
       );
 
       // Filtrar por query
@@ -254,8 +257,8 @@ class GetSavedRoutesUseCase {
       }
 
       final isSaved = await _routeRepository.isRouteSavedByUser(
-        routeId: routeId,
-        userId: currentUserId,
+        routeId,
+        currentUserId,
       );
 
       return Right(isSaved);

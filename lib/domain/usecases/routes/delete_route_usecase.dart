@@ -96,8 +96,8 @@ class DeleteRouteUseCase {
 
       // Verificar que la ruta está en favoritos
       final isSaved = await _routeRepository.isRouteSavedByUser(
-        routeId: routeId,
-        userId: currentUserId,
+        routeId,
+        currentUserId,
       );
 
       if (!isSaved) {
@@ -106,8 +106,8 @@ class DeleteRouteUseCase {
 
       // Remover de favoritos
       await _routeRepository.removeRouteFromUserFavorites(
-        routeId: routeId,
-        userId: currentUserId,
+        routeId,
+        currentUserId,
       );
 
       return const Right(true);
@@ -194,10 +194,7 @@ class DeleteRouteUseCase {
       }
 
       // Desactivar la ruta
-      await _routeRepository.updateRouteStatus(
-        routeId: routeId,
-        status: 'inactive',
-      );
+      await _routeRepository.updateRouteStatus(routeId, 'inactive');
 
       return const Right(true);
     } catch (e) {
@@ -219,13 +216,12 @@ class DeleteRouteUseCase {
     }
 
     // Verificar si tiene muchos usuarios que la guardaron
-    if (route.savesCount != null && route.savesCount! > 100) {
-      // Sugerir desactivar en lugar de eliminar
-      return const Left(
-        'Esta ruta es muy popular (${route.savesCount} usuarios la guardaron). '
-        'Considera desactivarla en lugar de eliminarla.',
-      );
-    }
+    // TODO: Implementar conteo de usuarios que guardaron la ruta
+    // if (route.savesCount != null && route.savesCount! > 100) {
+    //   return const Left(
+    //     'Esta ruta es muy popular. Considera desactivarla en lugar de eliminarla.',
+    //   );
+    // }
 
     return const Right(true);
   }
@@ -245,7 +241,7 @@ class DeleteRouteUseCase {
       // }
     } catch (e) {
       // No fallar si la notificación falla
-      print('Error al notificar usuarios: $e');
+      // Error al notificar usuarios
     }
   }
 

@@ -212,6 +212,151 @@ class TallerApiService {
   // MÉTODOS PRIVADOS
   // ========================================
 
+  /// Obtiene el horario de un taller
+  Future<Map<String, dynamic>?> getTallerSchedule(String tallerId) async {
+    try {
+      final taller = await getTallerById(tallerId);
+      if (taller == null || taller.horario == null) return null;
+
+      // Devuelve el horario como mapa
+      return {'horario': taller.horario};
+    } catch (e) {
+      throw Exception('Error al obtener horario del taller: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene los servicios de un taller
+  Future<List<String>> getTallerServices(String tallerId) async {
+    try {
+      // Por ahora devuelve una lista vacía
+      // Implementar cuando se cree la tabla de servicios
+      return [];
+    } catch (e) {
+      throw Exception('Error al obtener servicios del taller: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene las reseñas de un taller
+  Future<List<Map<String, dynamic>>> getTallerReviews(String tallerId) async {
+    try {
+      // Implementar cuando se cree la tabla de reseñas
+      return [];
+    } catch (e) {
+      throw Exception('Error al obtener reseñas del taller: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene las reseñas de un taller con paginación
+  Future<List<Map<String, dynamic>>> getTallerReviewsPaginated(
+    String tallerId, {
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    try {
+      // Implementar cuando se cree la tabla de reseñas
+      return [];
+    } catch (e) {
+      throw Exception('Error al obtener reseñas paginadas: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene el conteo de reseñas de un taller
+  Future<int> getTallerReviewsCount(String tallerId) async {
+    try {
+      // Implementar cuando se cree la tabla de reseñas
+      return 0;
+    } catch (e) {
+      throw Exception('Error al obtener conteo de reseñas: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene la distribución de calificaciones de un taller
+  Future<Map<int, int>> getRatingDistribution(String tallerId) async {
+    try {
+      // Implementar cuando se cree la tabla de reseñas
+      return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+    } catch (e) {
+      throw Exception(
+          'Error al obtener distribución de calificaciones: ${e.toString()}');
+    }
+  }
+
+  /// Verifica si un taller es favorito del usuario
+  Future<bool> isFavoriteTaller(String tallerId, String userId) async {
+    try {
+      // Implementar cuando se cree la tabla de favoritos
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Agrega un taller a favoritos
+  Future<void> addToFavorites(String tallerId, String userId) async {
+    try {
+      // Implementar cuando se cree la tabla de favoritos
+    } catch (e) {
+      throw Exception('Error al agregar a favoritos: ${e.toString()}');
+    }
+  }
+
+  /// Elimina un taller de favoritos
+  Future<void> removeFromFavorites(String tallerId, String userId) async {
+    try {
+      // Implementar cuando se cree la tabla de favoritos
+    } catch (e) {
+      throw Exception('Error al remover de favoritos: ${e.toString()}');
+    }
+  }
+
+  /// Verifica si un taller está abierto en este momento
+  Future<bool> isTallerOpen(String tallerId) async {
+    try {
+      final taller = await getTallerById(tallerId);
+      if (taller == null || taller.horario == null) return false;
+
+      // Implementar lógica de verificación de horario
+      // Por ahora devuelve true
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Obtiene la información de contacto de un taller
+  Future<Map<String, String?>> getTallerContactInfo(String tallerId) async {
+    try {
+      final taller = await getTallerById(tallerId);
+      if (taller == null) {
+        throw Exception('Taller no encontrado');
+      }
+
+      return {
+        'telefono': taller.telefono,
+        'direccion': taller.direccion,
+        'horario': taller.horario,
+      };
+    } catch (e) {
+      throw Exception(
+          'Error al obtener información de contacto: ${e.toString()}');
+    }
+  }
+
+  /// Calcula la distancia entre un punto y un taller
+  double calculateDistance(
+    double lat1,
+    double lon1,
+    String tallerId,
+  ) {
+    // Este método necesitará ser async para obtener las coordenadas del taller
+    // Por ahora devuelve 0
+    return 0.0;
+  }
+
+  // ========================================
+  // MÉTODOS PRIVADOS
+  // ========================================
+
   /// Calcula la distancia entre dos puntos usando la fórmula de Haversine
   /// Retorna la distancia en kilómetros
   double _calculateDistance(

@@ -264,9 +264,9 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           initialValue: _selectedRoadType,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Tipo de vía',
-            prefixIcon: Icon(Icons.road),
+            prefixIcon: Icon(Icons.route),
             border: OutlineInputBorder(),
           ),
           items:

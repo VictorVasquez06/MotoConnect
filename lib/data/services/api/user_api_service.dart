@@ -144,4 +144,20 @@ class UserApiService {
       throw Exception('Error al buscar usuarios: ${e.toString()}');
     }
   }
+
+  /// Obtiene todos los usuarios
+  Future<List<UserModel>> getAllUsers() async {
+    try {
+      final response = await _supabase
+          .from(ApiConstants.usersTable)
+          .select()
+          .limit(1000);
+
+      return (response as List)
+          .map((json) => UserModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Error al obtener todos los usuarios: ${e.toString()}');
+    }
+  }
 }

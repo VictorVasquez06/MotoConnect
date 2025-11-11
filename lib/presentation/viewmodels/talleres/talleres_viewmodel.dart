@@ -12,6 +12,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../data/models/taller_model.dart';
 
 /// Clase auxiliar para combinar datos del taller con el nombre del creador
 class TallerConCreador {
@@ -53,6 +54,10 @@ class TalleresViewModel extends ChangeNotifier {
   /// Indica si hay una operación en proceso
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+
+  /// Taller seleccionado para ver detalles
+  TallerModel? _selectedTaller;
+  TallerModel? get selectedTaller => _selectedTaller;
 
   // ========================================
   // MÉTODOS PÚBLICOS
@@ -327,6 +332,31 @@ class TalleresViewModel extends ChangeNotifier {
   /// Limpia el mensaje de error
   void clearError() {
     _errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Carga los detalles de un taller específico
+  Future<void> loadTallerDetail(String tallerId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final respuesta = await _supabase
+          .from('talleres')
+          .select('*, usuarios(nombre)')
+          .eq('id', tallerId)
+          .single();
+
+      _selectedTaller = TallerModel.fromJson(respuesta);
+      _isLoading = false;
+      _errorMessage = null;
+    } catch (e) {
+      _errorMessage = 'Error al cargar taller: ${e.toString()}';
+      _selectedTaller = null;
+      _isLoading = false;
+      debugPrint('Error en loadTallerDetail: $e');
+    }
+
     notifyListeners();
   }
 

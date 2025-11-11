@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../../data/models/event_model.dart';
 import '../../../data/repositories/event_repository.dart';
-import '../../../core/utils/validators.dart';
 
 /// Use case para crear un nuevo evento
 /// 
@@ -38,8 +37,27 @@ class CreateEventUseCase {
       // Aplicar reglas de negocio
       final processedData = _applyBusinessRules(eventData);
 
+      // Extraer fecha
+      DateTime eventDate;
+      final date = processedData['date'];
+      if (date is String) {
+        eventDate = DateTime.parse(date);
+      } else if (date is DateTime) {
+        eventDate = date;
+      } else {
+        return const Left('Fecha inválida');
+      }
+
       // Crear evento en el repositorio
-      final event = await _eventRepository.createEvent(processedData);
+      final event = await _eventRepository.createEvent(
+        title: processedData['title'] as String,
+        description: processedData['description'] as String,
+        date: eventDate,
+        location: processedData['location'] as String,
+        createdBy: processedData['createdBy'] as String? ??
+                   processedData['userId'] as String? ??
+                   processedData['organizerId'] as String? ?? '',
+      );
 
       return Right(event);
     } catch (e) {

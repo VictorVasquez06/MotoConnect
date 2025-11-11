@@ -181,4 +181,159 @@ class EventApiService {
       return false;
     }
   }
+
+  /// Busca eventos por título o ubicación
+  Future<List<Event>> searchEvents(String query) async {
+    try {
+      if (query.isEmpty) return [];
+
+      final response = await _supabase
+          .from(ApiConstants.eventsTable)
+          .select()
+          .or('titulo.ilike.%$query%,ubicacion.ilike.%$query%')
+          .order('fecha_hora', ascending: true)
+          .limit(20);
+
+      return (response as List).map((json) => Event.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Error al buscar eventos: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene eventos próximos (futuro)
+  Future<List<Event>> getUpcomingEvents() async {
+    try {
+      final now = DateTime.now().toIso8601String();
+      final response = await _supabase
+          .from(ApiConstants.eventsTable)
+          .select()
+          .gte('fecha_hora', now)
+          .order('fecha_hora', ascending: true);
+
+      return (response as List).map((json) => Event.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Error al obtener eventos próximos: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene eventos pasados
+  Future<List<Event>> getPastEvents() async {
+    try {
+      final now = DateTime.now().toIso8601String();
+      final response = await _supabase
+          .from(ApiConstants.eventsTable)
+          .select()
+          .lt('fecha_hora', now)
+          .order('fecha_hora', ascending: false);
+
+      return (response as List).map((json) => Event.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Error al obtener eventos pasados: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene eventos creados por un usuario
+  Future<List<Event>> getEventsByUser(String userId) async {
+    try {
+      final response = await _supabase
+          .from(ApiConstants.eventsTable)
+          .select()
+          .eq('creado_por', userId)
+          .order('fecha_hora', ascending: false);
+
+      return (response as List).map((json) => Event.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Error al obtener eventos del usuario: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene eventos en los que participa un usuario
+  Future<List<Event>> getEventsUserJoined(String userId) async {
+    try {
+      // Obtener IDs de eventos donde el usuario es participante
+      final participations = await _supabase
+          .from(ApiConstants.eventParticipantsTable)
+          .select('evento_id')
+          .eq('usuario_id', userId)
+          .eq('estado', 'confirmado');
+
+      if ((participations as List).isEmpty) return [];
+
+      final eventIds = participations.map((p) => p['evento_id']).toList();
+
+      // Obtener los eventos correspondientes
+      final response = await _supabase
+          .from(ApiConstants.eventsTable)
+          .select()
+          .inFilter('id', eventIds)
+          .order('fecha_hora', ascending: true);
+
+      return (response as List).map((json) => Event.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception(
+          'Error al obtener eventos donde participa el usuario: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene el conteo de participantes de un evento
+  Future<int> getEventParticipantsCount(String eventId) async {
+    try {
+      final response = await _supabase
+          .from(ApiConstants.eventParticipantsTable)
+          .select('usuario_id')
+          .eq('evento_id', eventId)
+          .eq('estado', 'confirmado');
+
+      return (response as List).length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /// Verifica si un usuario es el creador de un evento
+  Future<bool> isUserCreator(String eventId, String userId) async {
+    try {
+      final event = await getEventById(eventId);
+      return event?.createdBy == userId;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Obtiene eventos por ubicación cercana
+  Future<List<Event>> getEventsByLocation({
+    required String location,
+  }) async {
+    try {
+      final response = await _supabase
+          .from(ApiConstants.eventsTable)
+          .select()
+          .ilike('ubicacion', '%$location%')
+          .order('fecha_hora', ascending: true);
+
+      return (response as List).map((json) => Event.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Error al obtener eventos por ubicación: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene eventos en un rango de fechas
+  Future<List<Event>> getEventsByDateRange({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    try {
+      final response = await _supabase
+          .from(ApiConstants.eventsTable)
+          .select()
+          .gte('fecha_hora', startDate.toIso8601String())
+          .lte('fecha_hora', endDate.toIso8601String())
+          .order('fecha_hora', ascending: true);
+
+      return (response as List).map((json) => Event.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception(
+          'Error al obtener eventos por rango de fechas: ${e.toString()}');
+    }
+  }
 }

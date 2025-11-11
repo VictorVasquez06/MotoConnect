@@ -113,7 +113,7 @@ class CacheService {
 
       return true;
     } catch (e) {
-      print('Error saving to cache: $e');
+      // Error saving to cache
       return false;
     }
   }
@@ -166,7 +166,7 @@ class CacheService {
         return jsonString as T;
       }
     } catch (e) {
-      print('Error getting from cache: $e');
+      // Error getting from cache
       return null;
     }
   }
@@ -302,12 +302,9 @@ class CacheService {
 
   /// Imprime información del cache (para debug)
   Future<void> printStats() async {
-    final stats = await getStats();
-    print('=== Cache Statistics ===');
-    print('Total entries: ${stats.totalEntries}');
-    print('Valid entries: ${stats.validEntries}');
-    print('Expired entries: ${stats.expiredEntries}');
-    print('Memory entries: ${stats.memoryEntries}');
+    await getStats();
+    // Debug: Cache Statistics
+    // Total entries, valid entries, expired entries, memory entries
   }
 
   // ==================== Métodos Privados ====================

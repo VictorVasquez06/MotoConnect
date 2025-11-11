@@ -181,6 +181,154 @@ class RouteRepository {
     }
   }
 
+  /// Obtiene todas las rutas
+  ///
+  /// [filters] - Filtros opcionales para aplicar a la consulta
+  /// [limit] - Número máximo de rutas a obtener
+  /// [offset] - Número de rutas a omitir
+  ///
+  /// Retorna:
+  /// - Lista de todas las rutas en el sistema
+  Future<List<RouteModel>> getRoutes({
+    Map<String, dynamic>? filters,
+    int? limit,
+    int? offset,
+  }) async {
+    try {
+      // Por ahora, usar getRoutes básico y aplicar filtros manualmente
+      var routes = await _apiService.getRoutes();
+
+      // Aplicar límite y offset
+      if (offset != null && offset > 0) {
+        routes = routes.skip(offset).toList();
+      }
+      if (limit != null && limit > 0) {
+        routes = routes.take(limit).toList();
+      }
+
+      return routes;
+    } catch (e) {
+      throw Exception('Error al obtener rutas: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene rutas guardadas/favoritas de un usuario
+  ///
+  /// [userId] - ID del usuario
+  ///
+  /// Retorna:
+  /// - Lista de rutas guardadas por el usuario
+  Future<List<RouteModel>> getSavedRoutesForUser(String userId) async {
+    try {
+      return await _apiService.getSavedRoutesForUser(userId);
+    } catch (e) {
+      throw Exception('Error al obtener rutas guardadas: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene rutas creadas por un usuario
+  ///
+  /// [userId] - ID del usuario
+  ///
+  /// Retorna:
+  /// - Lista de rutas creadas por el usuario
+  Future<List<RouteModel>> getRoutesCreatedByUser(String userId) async {
+    try {
+      return await _apiService.getRoutesCreatedByUser(userId);
+    } catch (e) {
+      throw Exception('Error al obtener rutas creadas: ${e.toString()}');
+    }
+  }
+
+  /// Verifica si una ruta está guardada por el usuario
+  ///
+  /// [routeId] - ID de la ruta
+  /// [userId] - ID del usuario
+  ///
+  /// Retorna:
+  /// - true si la ruta está guardada por el usuario
+  Future<bool> isRouteSavedByUser(String routeId, String userId) async {
+    try {
+      return await _apiService.isRouteSavedByUser(routeId, userId);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Guarda una ruta en los favoritos del usuario
+  ///
+  /// [routeId] - ID de la ruta
+  /// [userId] - ID del usuario
+  Future<void> saveRouteForUser(String routeId, String userId) async {
+    try {
+      await _apiService.saveRouteForUser(routeId, userId);
+    } catch (e) {
+      throw Exception('Error al guardar ruta: ${e.toString()}');
+    }
+  }
+
+  /// Elimina una ruta de los favoritos del usuario
+  ///
+  /// [routeId] - ID de la ruta
+  /// [userId] - ID del usuario
+  Future<void> removeRouteFromUserFavorites(String routeId, String userId) async {
+    try {
+      await _apiService.removeRouteFromUserFavorites(routeId, userId);
+    } catch (e) {
+      throw Exception('Error al remover ruta de favoritos: ${e.toString()}');
+    }
+  }
+
+  /// Actualiza el estado de una ruta
+  ///
+  /// [routeId] - ID de la ruta
+  /// [status] - Nuevo estado de la ruta
+  Future<void> updateRouteStatus(String routeId, String status) async {
+    try {
+      await _apiService.updateRouteStatus(routeId, status);
+    } catch (e) {
+      throw Exception('Error al actualizar estado de ruta: ${e.toString()}');
+    }
+  }
+
+  /// Verifica si una ruta está siendo usada en eventos activos
+  ///
+  /// [routeId] - ID de la ruta
+  ///
+  /// Retorna:
+  /// - true si la ruta está siendo usada en eventos activos
+  Future<bool> isRouteUsedInActiveEvents(String routeId) async {
+    try {
+      return await _apiService.isRouteUsedInActiveEvents(routeId);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Obtiene rutas por ubicación
+  ///
+  /// [latitude] - Latitud de la ubicación
+  /// [longitude] - Longitud de la ubicación
+  /// [radiusKm] - Radio de búsqueda en kilómetros (default: 10km)
+  ///
+  /// Retorna:
+  /// - Lista de rutas cercanas a la ubicación
+  Future<List<RouteModel>> getRoutesByLocation({
+    required double latitude,
+    required double longitude,
+    double radiusKm = 10,
+  }) async {
+    try {
+      return await _apiService.getRoutesByLocation(
+        latitude: latitude,
+        longitude: longitude,
+        radiusKm: radiusKm,
+      );
+    } catch (e) {
+      throw Exception('Error al obtener rutas por ubicación: ${e.toString()}');
+    }
+  }
+
   /// Calcula la distancia total de una ruta en kilómetros
   ///
   /// [puntos] - Lista de puntos GPS de la ruta

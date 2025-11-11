@@ -43,6 +43,9 @@ class ProfileViewModel extends ChangeNotifier {
   bool _hasUnsavedChanges = false;
   bool get hasUnsavedChanges => _hasUnsavedChanges;
 
+  /// Usuario actual
+  User? get currentUser => _supabase.auth.currentUser;
+
   // ========================================
   // CLIENTE SUPABASE
   // ========================================
@@ -194,6 +197,54 @@ class ProfileViewModel extends ChangeNotifier {
   /// Descarta los cambios no guardados
   void discardChanges() {
     cargarDatosUsuario();
+  }
+
+  /// Actualiza el perfil del usuario
+  ///
+  /// [nombre] - Nuevo nombre del usuario
+  /// [modeloMoto] - Nuevo modelo de moto (opcional)
+  Future<bool> updateProfile({
+    required String nombre,
+    String? modeloMoto,
+  }) async {
+    nombreController.text = nombre;
+    if (modeloMoto != null) {
+      modeloMotoController.text = modeloMoto;
+    }
+    return await guardarPerfil();
+  }
+
+  /// Elimina la cuenta del usuario
+  ///
+  /// ADVERTENCIA: Esta acción es irreversible
+  Future<bool> deleteAccount() async {
+    if (_userId == null) {
+      _errorMessage = 'Error: No se pudo identificar al usuario';
+      notifyListeners();
+      return false;
+    }
+
+    _status = ProfileStatus.loading;
+    notifyListeners();
+
+    try {
+      // Primero eliminar los datos del usuario de la tabla usuarios
+      await _supabase.from('usuarios').delete().eq('id', _userId!);
+
+      // Nota: La eliminación de la cuenta de Auth se debe hacer desde el servidor
+      // o con privilegios especiales. Por seguridad, solo eliminamos los datos.
+
+      _status = ProfileStatus.loaded;
+      _errorMessage = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Error al eliminar cuenta: ${e.toString()}';
+      _status = ProfileStatus.error;
+      notifyListeners();
+      debugPrint('Error en deleteAccount: $e');
+      return false;
+    }
   }
 
   // ========================================

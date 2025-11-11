@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/models/event_model.dart';
 import '../../../data/repositories/event_repository.dart';
 
@@ -16,6 +17,7 @@ enum EventStatus { initial, loading, success, error }
 class EventsViewModel extends ChangeNotifier {
   // Cambiado de EventService a EventRepository (patrón correcto)
   final EventRepository _eventRepository = EventRepository();
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   List<Event> _events = [];
   List<Event> get events => _events;
@@ -25,6 +27,12 @@ class EventsViewModel extends ChangeNotifier {
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
+
+  Event? _selectedEvent;
+  Event? get selectedEvent => _selectedEvent;
+
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
 
   /// Carga la lista de eventos desde el repositorio.
   ///
@@ -50,5 +58,77 @@ class EventsViewModel extends ChangeNotifier {
   /// Recarga los eventos
   Future<void> refreshEvents() async {
     await fetchEvents();
+  }
+
+  /// Carga los detalles de un evento específico
+  Future<void> loadEventDetail(String eventId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final respuesta = await _supabase
+          .from('eventos')
+          .select()
+          .eq('id', eventId)
+          .single();
+
+      _selectedEvent = Event.fromJson(respuesta);
+      _isLoading = false;
+      _errorMessage = null;
+    } catch (e) {
+      _errorMessage = 'Error al cargar evento: ${e.toString()}';
+      _selectedEvent = null;
+      _isLoading = false;
+    }
+
+    notifyListeners();
+  }
+
+  /// Registra al usuario en un evento
+  Future<void> registerForEvent(String eventId) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await _supabase.from('event_participants').insert({
+        'event_id': eventId,
+        'user_id': userId,
+        'joined_at': DateTime.now().toIso8601String(),
+      });
+
+      // Recargar el evento para actualizar la lista de participantes
+      await loadEventDetail(eventId);
+    } catch (e) {
+      _errorMessage = 'Error al registrarse en el evento: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Cancela la inscripción del usuario en un evento
+  Future<void> unregisterFromEvent(String eventId) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await _supabase
+          .from('event_participants')
+          .delete()
+          .eq('event_id', eventId)
+          .eq('user_id', userId);
+
+      // Recargar el evento para actualizar la lista de participantes
+      await loadEventDetail(eventId);
+    } catch (e) {
+      _errorMessage = 'Error al cancelar inscripción: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

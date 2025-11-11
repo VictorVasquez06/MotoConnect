@@ -42,6 +42,10 @@ class SavedRoutesViewModel extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  /// Ruta seleccionada para ver detalles
+  Map<String, dynamic>? _selectedRoute;
+  Map<String, dynamic>? get selectedRoute => _selectedRoute;
+
   // ========================================
   // MÉTODOS PÚBLICOS
   // ========================================
@@ -202,5 +206,135 @@ class SavedRoutesViewModel extends ChangeNotifier {
           (ruta['descripcion_ruta'] as String?)?.toLowerCase() ?? '';
       return nombre.contains(queryLower) || descripcion.contains(queryLower);
     }).toList();
+  }
+
+  /// Carga los detalles de una ruta específica
+  ///
+  /// [routeId] - ID de la ruta a cargar
+  Future<void> loadRouteDetail(String routeId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await _supabase
+          .from('rutas_realizadas')
+          .select()
+          .eq('id', routeId)
+          .single();
+
+      _selectedRoute = response;
+      _errorMessage = null;
+    } catch (e) {
+      _errorMessage = 'Error al cargar detalles de la ruta: ${e.toString()}';
+      debugPrint('Error en loadRouteDetail: $e');
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  /// Crea una nueva ruta
+  ///
+  /// [routeData] - Datos de la ruta a crear
+  Future<bool> createRoute(Map<String, dynamic> routeData) async {
+    final currentUserUid = _supabase.auth.currentUser?.id;
+
+    if (currentUserUid == null) {
+      _errorMessage = 'Debes iniciar sesión para crear rutas';
+      notifyListeners();
+      return false;
+    }
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      // Asegurarse de que el usuario_id esté en los datos
+      routeData['usuario_id'] = currentUserUid;
+      routeData['fecha'] = DateTime.now().toIso8601String();
+
+      await _supabase.from('rutas_realizadas').insert(routeData);
+
+      // Recargar las rutas
+      await obtenerRutasGuardadas();
+
+      _isLoading = false;
+      _errorMessage = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Error al crear la ruta: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+      debugPrint('Error en createRoute: $e');
+      return false;
+    }
+  }
+
+  /// Guarda una ruta (marca como favorita o guardada)
+  ///
+  /// [routeId] - ID de la ruta a guardar
+  Future<bool> saveRoute(String routeId) async {
+    final currentUserUid = _supabase.auth.currentUser?.id;
+
+    if (currentUserUid == null) {
+      _errorMessage = 'Debes iniciar sesión para guardar rutas';
+      notifyListeners();
+      return false;
+    }
+
+    try {
+      // Crear una entrada en una tabla de favoritos o marcar la ruta
+      // Por ahora, simplemente actualizamos la ruta para indicar que está guardada
+      await _supabase
+          .from('rutas_realizadas')
+          .update({'guardada': true})
+          .eq('id', routeId);
+
+      // Recargar las rutas
+      await obtenerRutasGuardadas();
+
+      _errorMessage = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Error al guardar la ruta: ${e.toString()}';
+      notifyListeners();
+      debugPrint('Error en saveRoute: $e');
+      return false;
+    }
+  }
+
+  /// Quita una ruta de guardados (desmarca como favorita)
+  ///
+  /// [routeId] - ID de la ruta a desguardar
+  Future<bool> unsaveRoute(String routeId) async {
+    final currentUserUid = _supabase.auth.currentUser?.id;
+
+    if (currentUserUid == null) {
+      _errorMessage = 'Debes iniciar sesión';
+      notifyListeners();
+      return false;
+    }
+
+    try {
+      // Actualizar la ruta para indicar que no está guardada
+      await _supabase
+          .from('rutas_realizadas')
+          .update({'guardada': false})
+          .eq('id', routeId);
+
+      // Recargar las rutas
+      await obtenerRutasGuardadas();
+
+      _errorMessage = null;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Error al desguardar la ruta: ${e.toString()}';
+      notifyListeners();
+      debugPrint('Error en unsaveRoute: $e');
+      return false;
+    }
   }
 }

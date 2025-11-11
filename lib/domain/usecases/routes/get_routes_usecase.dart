@@ -3,7 +3,7 @@ import '../../../data/models/route_model.dart';
 import '../../../data/repositories/route_repository.dart';
 
 /// Use case para obtener rutas disponibles
-/// 
+///
 /// Maneja la lógica de negocio para recuperar rutas
 /// con filtros, ordenamiento y paginación
 class GetRoutesUseCase {
@@ -12,7 +12,7 @@ class GetRoutesUseCase {
   GetRoutesUseCase(this._routeRepository);
 
   /// Ejecuta el use case para obtener rutas
-  /// 
+  ///
   /// [filters] - Mapa opcional de filtros
   ///   - 'difficulty': String ('fácil', 'moderada', 'difícil')
   ///   - 'type': String ('recreativa', 'deportiva', 'turística', 'técnica')
@@ -22,7 +22,7 @@ class GetRoutesUseCase {
   /// [limit] - Número máximo de rutas a retornar
   /// [offset] - Offset para paginación
   /// [sortBy] - Campo por el cual ordenar ('distance', 'rating', 'created_at')
-  /// 
+  ///
   /// Retorna [Right] con lista de rutas si es exitoso
   /// Retorna [Left] con mensaje de error si falla
   Future<Either<String, List<RouteModel>>> execute({
@@ -36,7 +36,7 @@ class GetRoutesUseCase {
       if (limit <= 0) {
         return const Left('El límite debe ser mayor a 0');
       }
-      
+
       if (offset < 0) {
         return const Left('El offset no puede ser negativo');
       }
@@ -64,17 +64,17 @@ class GetRoutesUseCase {
   }
 
   /// Obtiene rutas por nivel de dificultad
-  /// 
+  ///
   /// [difficulty] - 'fácil', 'moderada', 'difícil'
   Future<Either<String, List<RouteModel>>> getByDifficulty({
     required String difficulty,
     int limit = 20,
   }) async {
     final validDifficulties = ['fácil', 'moderada', 'difícil'];
-    
+
     if (!validDifficulties.contains(difficulty.toLowerCase())) {
       return Left(
-        'Dificultad inválida. Debe ser: ${validDifficulties.join(", ")}'
+        'Dificultad inválida. Debe ser: ${validDifficulties.join(", ")}',
       );
     }
 
@@ -85,28 +85,23 @@ class GetRoutesUseCase {
   }
 
   /// Obtiene rutas por tipo
-  /// 
+  ///
   /// [type] - 'recreativa', 'deportiva', 'turística', 'técnica'
   Future<Either<String, List<RouteModel>>> getByType({
     required String type,
     int limit = 20,
   }) async {
     final validTypes = ['recreativa', 'deportiva', 'turística', 'técnica'];
-    
+
     if (!validTypes.contains(type.toLowerCase())) {
-      return Left(
-        'Tipo inválido. Debe ser: ${validTypes.join(", ")}'
-      );
+      return Left('Tipo inválido. Debe ser: ${validTypes.join(", ")}');
     }
 
-    return execute(
-      filters: {'type': type.toLowerCase()},
-      limit: limit,
-    );
+    return execute(filters: {'type': type.toLowerCase()}, limit: limit);
   }
 
   /// Obtiene rutas por rango de distancia
-  /// 
+  ///
   /// [minDistance] - Distancia mínima en km
   /// [maxDistance] - Distancia máxima en km
   Future<Either<String, List<RouteModel>>> getByDistanceRange({
@@ -123,16 +118,13 @@ class GetRoutesUseCase {
     }
 
     return execute(
-      filters: {
-        'minDistance': minDistance,
-        'maxDistance': maxDistance,
-      },
+      filters: {'minDistance': minDistance, 'maxDistance': maxDistance},
       limit: limit,
     );
   }
 
   /// Obtiene rutas cercanas a una ubicación
-  /// 
+  ///
   /// [latitude] - Latitud de la ubicación
   /// [longitude] - Longitud de la ubicación
   /// [radiusKm] - Radio de búsqueda en kilómetros
@@ -165,13 +157,8 @@ class GetRoutesUseCase {
   }
 
   /// Obtiene las rutas mejor valoradas
-  Future<Either<String, List<RouteModel>>> getTopRated({
-    int limit = 10,
-  }) async {
-    return execute(
-      limit: limit,
-      sortBy: 'rating',
-    );
+  Future<Either<String, List<RouteModel>>> getTopRated({int limit = 10}) async {
+    return execute(limit: limit, sortBy: 'rating');
   }
 
   /// Obtiene rutas más populares (más guardadas)
@@ -195,7 +182,8 @@ class GetRoutesUseCase {
     if (filters.containsKey('difficulty')) {
       final difficulty = filters['difficulty'] as String?;
       final validDifficulties = ['fácil', 'moderada', 'difícil'];
-      if (difficulty != null && !validDifficulties.contains(difficulty.toLowerCase())) {
+      if (difficulty != null &&
+          !validDifficulties.contains(difficulty.toLowerCase())) {
         return 'Dificultad inválida';
       }
     }

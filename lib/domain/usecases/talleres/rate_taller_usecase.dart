@@ -1,29 +1,5 @@
 import 'package:motoconnect/data/repositories/taller_repository.dart';
-
-/// Modelo para representar una calificación de taller
-class TallerRating {
-  final String id;
-  final String tallerId;
-  final String userId;
-  final double rating;
-  final String comment;
-  final List<String>? images;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
-  final Map<String, double>? categoryRatings; // {servicio: 5.0, precio: 4.0, atencion: 5.0}
-
-  TallerRating({
-    required this.id,
-    required this.tallerId,
-    required this.userId,
-    required this.rating,
-    required this.comment,
-    this.images,
-    required this.createdAt,
-    this.updatedAt,
-    this.categoryRatings,
-  });
-}
+import 'package:motoconnect/data/models/taller_details_models.dart';
 
 /// Caso de uso para calificar un taller
 class RateTallerUseCase {
@@ -78,25 +54,41 @@ class RateTallerUseCase {
 
     try {
       // Verificar si el usuario ya calificó este taller
-      final hasRated = await _tallerRepository.hasUserRatedTaller(
-        tallerId: tallerId,
-        userId: userId,
-      );
+      final hasRated = await _tallerRepository.hasUserRatedTaller(tallerId, userId);
 
       if (hasRated) {
         throw Exception('Ya has calificado este taller. Usa editRating() para modificar tu calificación.');
       }
 
-      final tallerRating = await _tallerRepository.createRating(
+      final ratingId = await _tallerRepository.createRating(
         tallerId: tallerId,
         userId: userId,
-        rating: rating,
+        rating: rating.toInt(),
         comment: comment,
-        images: images,
-        categoryRatings: categoryRatings,
       );
 
-      return tallerRating;
+      // Si hay imágenes, subirlas
+      List<String>? uploadedImages;
+      if (images != null && images.isNotEmpty) {
+        uploadedImages = await _tallerRepository.uploadRatingImages(ratingId, images);
+      }
+
+      // Crear y retornar el objeto TallerRating
+      return TallerRating(
+        id: ratingId,
+        tallerId: tallerId,
+        userId: userId,
+        userName: '', // Se puede obtener del user repository si es necesario
+        rating: rating.toInt(),
+        comment: comment,
+        images: uploadedImages,
+        createdAt: DateTime.now(),
+        categoryRatings: categoryRatings != null
+            ? Map<String, int>.fromEntries(
+                categoryRatings.entries.map((e) => MapEntry(e.key, e.value.toInt()))
+              )
+            : null,
+      );
     } catch (e) {
       throw Exception('Error al calificar el taller: $e');
     }
@@ -126,18 +118,17 @@ class RateTallerUseCase {
     }
 
     try {
-      // Subir las imágenes
-      final imageUrls = await _tallerRepository.uploadRatingImages(imagePaths);
-
-      // Crear la calificación con las URLs de las imágenes
-      return await call(
+      // Primero crear el rating básico
+      final ratingResult = await call(
         tallerId: tallerId,
         userId: userId,
         rating: rating,
         comment: comment,
-        images: imageUrls,
+        images: imagePaths, // Usar las rutas locales temporalmente
         categoryRatings: categoryRatings,
       );
+
+      return ratingResult;
     } catch (e) {
       throw Exception('Error al calificar con imágenes: $e');
     }
@@ -176,23 +167,36 @@ class RateTallerUseCase {
     }
 
     try {
-      final updatedRating = await _tallerRepository.updateRating(
+      await _tallerRepository.updateRating(
         ratingId: ratingId,
-        userId: userId,
-        rating: rating,
+        rating: rating.toInt(),
         comment: comment,
-        images: images,
-        categoryRatings: categoryRatings,
       );
 
-      return updatedRating;
+      // Crear y retornar el objeto TallerRating actualizado
+      return TallerRating(
+        id: ratingId,
+        tallerId: '', // No lo tenemos aquí, se podría pasar como parámetro
+        userId: userId,
+        userName: '', // Se puede obtener del user repository si es necesario
+        rating: rating.toInt(),
+        comment: comment,
+        images: images,
+        createdAt: DateTime.now(), // No tenemos la fecha original
+        updatedAt: DateTime.now(),
+        categoryRatings: categoryRatings != null
+            ? Map<String, int>.fromEntries(
+                categoryRatings.entries.map((e) => MapEntry(e.key, e.value.toInt()))
+              )
+            : null,
+      );
     } catch (e) {
       throw Exception('Error al editar la calificación: $e');
     }
   }
 
   /// Elimina una calificación
-  /// 
+  ///
   /// [ratingId] - ID de la calificación a eliminar
   /// [userId] - ID del usuario (debe ser el autor)
   Future<bool> deleteRating({
@@ -200,10 +204,7 @@ class RateTallerUseCase {
     required String userId,
   }) async {
     try {
-      await _tallerRepository.deleteRating(
-        ratingId: ratingId,
-        userId: userId,
-      );
+      await _tallerRepository.deleteRating(ratingId);
       return true;
     } catch (e) {
       throw Exception('Error al eliminar la calificación: $e');
@@ -211,27 +212,26 @@ class RateTallerUseCase {
   }
 
   /// Obtiene la calificación del usuario para un taller
-  /// 
+  ///
   /// [tallerId] - ID del taller
   /// [userId] - ID del usuario
-  /// 
+  ///
   /// Retorna la calificación si existe, null si no
   Future<TallerRating?> getUserRating({
     required String tallerId,
     required String userId,
   }) async {
     try {
-      return await _tallerRepository.getUserRatingForTaller(
-        tallerId: tallerId,
-        userId: userId,
-      );
+      final ratingData = await _tallerRepository.getUserRatingForTaller(tallerId, userId);
+      if (ratingData == null) return null;
+      return TallerRating.fromJson(ratingData);
     } catch (e) {
       throw Exception('Error al obtener la calificación del usuario: $e');
     }
   }
 
   /// Verifica si el usuario ya calificó el taller
-  /// 
+  ///
   /// [tallerId] - ID del taller
   /// [userId] - ID del usuario
   Future<bool> hasUserRated({
@@ -239,10 +239,7 @@ class RateTallerUseCase {
     required String userId,
   }) async {
     try {
-      return await _tallerRepository.hasUserRatedTaller(
-        tallerId: tallerId,
-        userId: userId,
-      );
+      return await _tallerRepository.hasUserRatedTaller(tallerId, userId);
     } catch (e) {
       throw Exception('Error al verificar calificación: $e');
     }
@@ -275,7 +272,7 @@ class RateTallerUseCase {
   }
 
   /// Da "me gusta" a una reseña
-  /// 
+  ///
   /// [ratingId] - ID de la calificación
   /// [userId] - ID del usuario
   Future<bool> likeRating({
@@ -283,10 +280,7 @@ class RateTallerUseCase {
     required String userId,
   }) async {
     try {
-      await _tallerRepository.likeRating(
-        ratingId: ratingId,
-        userId: userId,
-      );
+      await _tallerRepository.likeRating(ratingId, userId);
       return true;
     } catch (e) {
       throw Exception('Error al dar me gusta a la reseña: $e');
@@ -294,7 +288,7 @@ class RateTallerUseCase {
   }
 
   /// Quita el "me gusta" de una reseña
-  /// 
+  ///
   /// [ratingId] - ID de la calificación
   /// [userId] - ID del usuario
   Future<bool> unlikeRating({
@@ -302,10 +296,7 @@ class RateTallerUseCase {
     required String userId,
   }) async {
     try {
-      await _tallerRepository.unlikeRating(
-        ratingId: ratingId,
-        userId: userId,
-      );
+      await _tallerRepository.unlikeRating(ratingId, userId);
       return true;
     } catch (e) {
       throw Exception('Error al quitar me gusta de la reseña: $e');

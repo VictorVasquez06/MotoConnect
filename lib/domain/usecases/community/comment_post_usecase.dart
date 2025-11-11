@@ -1,25 +1,8 @@
 import 'package:motoconnect/data/repositories/post_repository.dart';
+import 'package:motoconnect/data/models/post_model.dart';
 
-/// Modelo para representar un comentario
-class Comment {
-  final String id;
-  final String postId;
-  final String userId;
-  final String content;
-  final DateTime createdAt;
-  final String? userAvatar;
-  final String? userName;
-
-  Comment({
-    required this.id,
-    required this.postId,
-    required this.userId,
-    required this.content,
-    required this.createdAt,
-    this.userAvatar,
-    this.userName,
-  });
-}
+/// Alias para compatibilidad
+typedef Comment = CommentModel;
 
 /// Caso de uso para gestionar los comentarios de los posts
 class CommentPostUseCase {

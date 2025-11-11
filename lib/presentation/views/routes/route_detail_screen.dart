@@ -93,7 +93,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
               end: Alignment.bottomRight,
               colors: [
                 Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withOpacity(0.7),
+                Theme.of(context).primaryColor.withValues(alpha: 0.7),
               ],
             ),
           ),
@@ -187,12 +187,12 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow(Icons.location_on, 'Inicio', route.startPoint),
+            _buildInfoRow(Icons.location_on, 'Inicio', route.startPoint ?? 'No especificado'),
             const Divider(height: 24),
-            _buildInfoRow(Icons.flag, 'Destino', route.endPoint),
+            _buildInfoRow(Icons.flag, 'Destino', route.endPoint ?? 'No especificado'),
             if (route.roadType != null) ...[
               const Divider(height: 24),
-              _buildInfoRow(Icons.road, 'Tipo de vía', route.roadType!),
+              _buildInfoRow(Icons.route, 'Tipo de vía', route.roadType!),
             ],
             if (route.scenicValue != null) ...[
               const Divider(height: 24),
@@ -371,7 +371,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, -2),
               ),

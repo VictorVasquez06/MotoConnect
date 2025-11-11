@@ -15,7 +15,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/config/supabase_config.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../models/post_model.dart';
-import '../../usecases/comment_post_usecase.dart';
 
 class PostApiService {
   // ========================================
@@ -426,11 +425,11 @@ class PostApiService {
     try {
       final response = await _supabase
           .from(ApiConstants.likesTable)
-          .select('id', const FetchOptions(count: CountOption.exact))
-          .eq('post_id', postId);
+          .select('id')
+          .eq('post_id', postId)
+          .count();
 
-      // La respuesta incluye el conteo en el header
-      return (response as List).length;
+      return response.count;
     } catch (e) {
       throw Exception('Error al obtener cantidad de likes: ${e.toString()}');
     }
@@ -441,7 +440,7 @@ class PostApiService {
   // ========================================
 
   /// Agrega un comentario a una publicación
-  Future<Comment> addComment({
+  Future<CommentModel> addComment({
     required String postId,
     required String userId,
     required String content,
@@ -462,13 +461,13 @@ class PostApiService {
       // Obtener nombre del usuario
       final userName = await _getUserName(userId);
 
-      return Comment(
+      return CommentModel(
         id: response['id'] as String,
         postId: response['post_id'] as String,
-        userId: response['usuario_id'] as String,
-        content: response['contenido'] as String,
-        createdAt: DateTime.parse(response['fecha'] as String),
-        userName: userName,
+        usuarioId: response['usuario_id'] as String,
+        nombreUsuario: userName ?? '',
+        contenido: response['contenido'] as String,
+        fecha: DateTime.parse(response['fecha'] as String),
       );
     } catch (e) {
       throw Exception('Error al agregar comentario: ${e.toString()}');
@@ -476,7 +475,7 @@ class PostApiService {
   }
 
   /// Obtiene todos los comentarios de una publicación
-  Future<List<Comment>> getPostComments(String postId) async {
+  Future<List<CommentModel>> getPostComments(String postId) async {
     try {
       final response = await _supabase
           .from(ApiConstants.commentsTable)
@@ -484,7 +483,7 @@ class PostApiService {
           .eq('post_id', postId)
           .order('fecha', ascending: true);
 
-      final List<Comment> comments = [];
+      final List<CommentModel> comments = [];
 
       for (var commentData in response as List) {
         final userName = await _getUserName(
@@ -492,13 +491,13 @@ class PostApiService {
         );
 
         comments.add(
-          Comment(
+          CommentModel(
             id: commentData['id'] as String,
             postId: commentData['post_id'] as String,
-            userId: commentData['usuario_id'] as String,
-            content: commentData['contenido'] as String,
-            createdAt: DateTime.parse(commentData['fecha'] as String),
-            userName: userName,
+            usuarioId: commentData['usuario_id'] as String,
+            nombreUsuario: userName ?? '',
+            contenido: commentData['contenido'] as String,
+            fecha: DateTime.parse(commentData['fecha'] as String),
           ),
         );
       }
@@ -510,7 +509,7 @@ class PostApiService {
   }
 
   /// Obtiene comentarios paginados de una publicación
-  Future<List<Comment>> getPostCommentsPaginated({
+  Future<List<CommentModel>> getPostCommentsPaginated({
     required String postId,
     required int page,
     int limit = 20,
@@ -525,7 +524,7 @@ class PostApiService {
           .order('fecha', ascending: true)
           .range(offset, offset + limit - 1);
 
-      final List<Comment> comments = [];
+      final List<CommentModel> comments = [];
 
       for (var commentData in response as List) {
         final userName = await _getUserName(
@@ -533,13 +532,13 @@ class PostApiService {
         );
 
         comments.add(
-          Comment(
+          CommentModel(
             id: commentData['id'] as String,
             postId: commentData['post_id'] as String,
-            userId: commentData['usuario_id'] as String,
-            content: commentData['contenido'] as String,
-            createdAt: DateTime.parse(commentData['fecha'] as String),
-            userName: userName,
+            usuarioId: commentData['usuario_id'] as String,
+            nombreUsuario: userName ?? '',
+            contenido: commentData['contenido'] as String,
+            fecha: DateTime.parse(commentData['fecha'] as String),
           ),
         );
       }
@@ -580,7 +579,7 @@ class PostApiService {
   }
 
   /// Actualiza un comentario
-  Future<Comment> updateComment({
+  Future<CommentModel> updateComment({
     required String commentId,
     required String userId,
     required String content,
@@ -608,13 +607,13 @@ class PostApiService {
 
       final userName = await _getUserName(userId);
 
-      return Comment(
+      return CommentModel(
         id: response['id'] as String,
         postId: response['post_id'] as String,
-        userId: response['usuario_id'] as String,
-        content: response['contenido'] as String,
-        createdAt: DateTime.parse(response['fecha'] as String),
-        userName: userName,
+        usuarioId: response['usuario_id'] as String,
+        nombreUsuario: userName ?? '',
+        contenido: response['contenido'] as String,
+        fecha: DateTime.parse(response['fecha'] as String),
       );
     } catch (e) {
       throw Exception('Error al actualizar comentario: ${e.toString()}');
@@ -626,10 +625,11 @@ class PostApiService {
     try {
       final response = await _supabase
           .from(ApiConstants.commentsTable)
-          .select('id', const FetchOptions(count: CountOption.exact))
-          .eq('post_id', postId);
+          .select('id')
+          .eq('post_id', postId)
+          .count();
 
-      return (response as List).length;
+      return response.count;
     } catch (e) {
       throw Exception(
         'Error al obtener cantidad de comentarios: ${e.toString()}',
@@ -653,7 +653,7 @@ class PostApiService {
 
       return response?['nombre'] as String?;
     } catch (e) {
-      print('Error obteniendo nombre de usuario: $e');
+      // Error obteniendo nombre de usuario
       return null;
     }
   }
@@ -670,7 +670,7 @@ class PostApiService {
 
       return response?['nombre_ruta'] as String?;
     } catch (e) {
-      print('Error obteniendo nombre de ruta: $e');
+      // Error obteniendo nombre de ruta
       return null;
     }
   }
@@ -687,7 +687,7 @@ class PostApiService {
 
       return response;
     } catch (e) {
-      print('Error obteniendo datos de evento: $e');
+      // Error obteniendo datos de evento
       return null;
     }
   }

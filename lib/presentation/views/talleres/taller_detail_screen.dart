@@ -110,7 +110,7 @@ class _TallerDetailScreenState extends State<TallerDetailScreen> {
           end: Alignment.bottomRight,
           colors: [
             Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.7),
+            Theme.of(context).primaryColor.withValues(alpha: 0.7),
           ],
         ),
       ),
@@ -256,23 +256,9 @@ class _TallerDetailScreenState extends State<TallerDetailScreen> {
                   color: Theme.of(context).primaryColor,
                 ),
                 title: Text(
-                  service.name,
+                  service,
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                subtitle:
-                    service.description != null
-                        ? Text(service.description!)
-                        : null,
-                trailing:
-                    service.price != null
-                        ? Text(
-                          '\$${service.price!.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        )
-                        : null,
               );
             },
           ),
@@ -357,41 +343,10 @@ class _TallerDetailScreenState extends State<TallerDetailScreen> {
           elevation: 2,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                _buildScheduleRow(
-                  'Lunes - Viernes',
-                  taller.schedule!['weekdays'],
-                ),
-                if (taller.schedule!['saturday'] != null) ...[
-                  const Divider(height: 24),
-                  _buildScheduleRow('Sábado', taller.schedule!['saturday']),
-                ],
-                if (taller.schedule!['sunday'] != null) ...[
-                  const Divider(height: 24),
-                  _buildScheduleRow('Domingo', taller.schedule!['sunday']),
-                ],
-              ],
+            child: Text(
+              taller.schedule!,
+              style: const TextStyle(fontSize: 16),
             ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildScheduleRow(String day, String? hours) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          day,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-        ),
-        Text(
-          hours ?? 'Cerrado',
-          style: TextStyle(
-            fontSize: 16,
-            color: hours != null ? Colors.black87 : Colors.grey,
           ),
         ),
       ],
@@ -521,7 +476,7 @@ class _TallerDetailScreenState extends State<TallerDetailScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, -2),
               ),

@@ -100,7 +100,7 @@ class GetEventDetailsUseCase {
     try {
       return await _userRepository.getUserById(userId);
     } catch (e) {
-      print('Error al obtener información del usuario $userId: $e');
+      // Error al obtener información del usuario
       return null;
     }
   }

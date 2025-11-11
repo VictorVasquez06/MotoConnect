@@ -154,4 +154,43 @@ class UserRepository {
       throw Exception('Error al buscar usuarios: ${e.toString()}');
     }
   }
+
+  /// Obtiene todos los usuarios
+  ///
+  /// Retorna:
+  /// - Lista de todos los usuarios
+  Future<List<UserModel>> getAllUsers() async {
+    try {
+      return await _apiService.getAllUsers();
+    } catch (e) {
+      throw Exception('Error al obtener todos los usuarios: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene un usuario por ID (alias de getUserProfile)
+  ///
+  /// [userId] - ID del usuario
+  ///
+  /// Retorna:
+  /// - UserModel del usuario
+  /// - null si no se encuentra
+  Future<UserModel?> getUserById(String userId) async {
+    return await getUserProfile(userId);
+  }
+
+  /// Obtiene el usuario actual (alias de getCurrentUserProfile)
+  ///
+  /// Retorna:
+  /// - UserModel del usuario autenticado
+  /// - null si no hay sesión activa
+  Future<UserModel?> getCurrentUser() async {
+    return await getCurrentUserProfile();
+  }
+
+  /// Elimina un usuario (alias de deleteUserProfile)
+  ///
+  /// [userId] - ID del usuario
+  Future<void> deleteUser(String userId) async {
+    return await deleteUserProfile(userId);
+  }
 }

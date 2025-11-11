@@ -51,21 +51,6 @@ class ApiConstants {
   /// Nombre de tabla de reacciones
   static const String reactionsTable = 'reacciones_comunidad';
 
-  /// Tabla de publicaciones
-  static const String postsTable = 'publicaciones';
-
-  /// Tabla de usuarios
-  static const String usersTable = 'usuarios';
-
-  /// Tabla de rutas
-  static const String routesTable = 'rutas_realizadas';
-
-  /// Tabla de eventos
-  static const String eventsTable = 'eventos';
-
-  /// Tabla de talleres
-  static const String talleresTable = 'talleres';
-
   /// Tabla de likes
   static const String likesTable = 'likes';
 

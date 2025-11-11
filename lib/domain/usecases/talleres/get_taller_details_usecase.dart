@@ -1,60 +1,6 @@
 import 'package:motoconnect/data/models/taller_model.dart';
 import 'package:motoconnect/data/repositories/taller_repository.dart';
-
-/// Modelo para representar el horario de un taller
-class TallerSchedule {
-  final String day;
-  final String openTime;
-  final String closeTime;
-  final bool isOpen;
-
-  TallerSchedule({
-    required this.day,
-    required this.openTime,
-    required this.closeTime,
-    required this.isOpen,
-  });
-}
-
-/// Modelo para representar un servicio del taller
-class TallerService {
-  final String id;
-  final String name;
-  final String description;
-  final double price;
-  final int estimatedDuration; // en minutos
-
-  TallerService({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.price,
-    required this.estimatedDuration,
-  });
-}
-
-/// Modelo para representar una reseña del taller
-class TallerReview {
-  final String id;
-  final String userId;
-  final String userName;
-  final String? userAvatar;
-  final double rating;
-  final String comment;
-  final DateTime createdAt;
-  final List<String>? images;
-
-  TallerReview({
-    required this.id,
-    required this.userId,
-    required this.userName,
-    this.userAvatar,
-    required this.rating,
-    required this.comment,
-    required this.createdAt,
-    this.images,
-  });
-}
+import 'package:motoconnect/data/models/taller_details_models.dart';
 
 /// Modelo para detalles completos del taller
 class TallerDetails {
@@ -115,7 +61,7 @@ class GetTallerDetailsUseCase {
       final services = await _tallerRepository.getTallerServices(tallerId);
       
       // Obtener reseñas del taller (primeras 10)
-      final reviews = await _tallerRepository.getTallerReviews(
+      final reviews = await _tallerRepository.getTallerReviewsPaginated(
         tallerId,
         limit: 10,
       );
@@ -129,21 +75,13 @@ class GetTallerDetailsUseCase {
       // Verificar si es favorito del usuario
       bool isFavorite = false;
       if (userId != null) {
-        isFavorite = await _tallerRepository.isFavoriteTaller(
-          tallerId: tallerId,
-          userId: userId,
-        );
+        isFavorite = await _tallerRepository.isFavoriteTaller(tallerId, userId);
       }
       
       // Calcular distancia si se proporcionan coordenadas
       double? distanceKm;
       if (userLatitude != null && userLongitude != null) {
-        distanceKm = await _tallerRepository.calculateDistance(
-          fromLatitude: userLatitude,
-          fromLongitude: userLongitude,
-          toLatitude: taller.latitude,
-          toLongitude: taller.longitude,
-        );
+        distanceKm = _tallerRepository.calculateDistance(userLatitude, userLongitude, tallerId);
       }
 
       return TallerDetails(
@@ -212,7 +150,7 @@ class GetTallerDetailsUseCase {
   }) async {
     try {
       return await _tallerRepository.getTallerReviewsPaginated(
-        tallerId: tallerId,
+        tallerId,
         page: page,
         limit: limit,
       );
@@ -244,15 +182,9 @@ class GetTallerDetailsUseCase {
   }) async {
     try {
       if (isFavorite) {
-        await _tallerRepository.addToFavorites(
-          tallerId: tallerId,
-          userId: userId,
-        );
+        await _tallerRepository.addToFavorites(tallerId, userId);
       } else {
-        await _tallerRepository.removeFromFavorites(
-          tallerId: tallerId,
-          userId: userId,
-        );
+        await _tallerRepository.removeFromFavorites(tallerId, userId);
       }
       return !isFavorite;
     } catch (e) {

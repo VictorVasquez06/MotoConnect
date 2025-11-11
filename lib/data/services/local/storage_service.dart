@@ -208,10 +208,9 @@ class StorageService {
 
   /// Imprime estadísticas de almacenamiento (para debug)
   void printStats() {
-    final keys = getKeys();
-    print('=== Storage Statistics ===');
-    print('Total keys: ${keys.length}');
-    print('Keys: $keys');
+    getKeys();
+    // Debug: Storage Statistics
+    // Total keys and key names
   }
 }
 

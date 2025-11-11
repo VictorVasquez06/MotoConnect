@@ -52,10 +52,13 @@ class JoinEventUseCase {
       }
 
       // Unir al usuario al evento
-      final updatedEvent = await _eventRepository.joinEvent(
-        eventId: eventId,
-        userId: currentUserId,
-      );
+      await _eventRepository.joinEvent(eventId, currentUserId);
+
+      // Obtener el evento actualizado
+      final updatedEvent = await _eventRepository.getEventById(eventId);
+      if (updatedEvent == null) {
+        return const Left('Error al obtener el evento actualizado');
+      }
 
       // Enviar notificación al organizador (opcional)
       await _notifyEventOrganizer(
@@ -104,10 +107,13 @@ class JoinEventUseCase {
       }
 
       // Abandonar el evento
-      final updatedEvent = await _eventRepository.leaveEvent(
-        eventId: eventId,
-        userId: currentUserId,
-      );
+      await _eventRepository.leaveEvent(eventId, currentUserId);
+
+      // Obtener el evento actualizado
+      final updatedEvent = await _eventRepository.getEventById(eventId);
+      if (updatedEvent == null) {
+        return const Left('Error al obtener el evento actualizado');
+      }
 
       return Right(updatedEvent);
     } catch (e) {
@@ -190,7 +196,7 @@ class JoinEventUseCase {
       // );
     } catch (e) {
       // No fallar si la notificación falla
-      print('Error al enviar notificación: $e');
+      // Error al enviar notificación
     }
   }
 

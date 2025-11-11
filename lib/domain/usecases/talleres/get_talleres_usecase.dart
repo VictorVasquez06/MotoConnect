@@ -85,7 +85,7 @@ class GetTalleresUseCase {
   /// [limit] - número máximo de talleres a retornar
   Future<List<TallerModel>> getTopRated({int limit = 10}) async {
     try {
-      final talleres = await _tallerRepository.getTopRatedTalleres(limit);
+      final talleres = await _tallerRepository.getTopRatedTalleres(limit: limit);
       return talleres;
     } catch (e) {
       throw Exception('Error al obtener talleres mejor calificados: $e');
@@ -107,14 +107,17 @@ class GetTalleresUseCase {
     double? userLongitude,
   }) async {
     try {
-      final talleres = await _tallerRepository.getTalleresFiltered(
-        minRating: minRating,
-        maxDistance: maxDistance,
-        categories: categories,
-        isOpen: isOpen,
-        userLatitude: userLatitude,
-        userLongitude: userLongitude,
-      );
+      // Construir el mapa de filtros
+      final filters = <String, dynamic>{
+        if (minRating != null) 'minRating': minRating,
+        if (maxDistance != null) 'maxDistance': maxDistance,
+        if (categories != null) 'categories': categories,
+        if (isOpen != null) 'isOpen': isOpen,
+        if (userLatitude != null) 'userLatitude': userLatitude,
+        if (userLongitude != null) 'userLongitude': userLongitude,
+      };
+
+      final talleres = await _tallerRepository.getTalleresFiltered(filters);
       return talleres;
     } catch (e) {
       throw Exception('Error al obtener talleres filtrados: $e');
@@ -144,7 +147,7 @@ class GetTalleresUseCase {
     try {
       final talleres = await _tallerRepository.getTalleresPaginated(
         page: page,
-        limit: limit,
+        pageSize: limit,
       );
       return talleres;
     } catch (e) {
