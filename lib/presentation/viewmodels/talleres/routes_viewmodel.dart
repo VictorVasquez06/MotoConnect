@@ -18,6 +18,7 @@ import 'package:google_place/google_place.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/config/supabase_config.dart';
 import 'dart:async';
 
 /// Estados posibles de la pantalla de rutas
@@ -50,7 +51,9 @@ class RoutesViewModel extends ChangeNotifier {
   // CLIENTES Y SERVICIOS
   // ========================================
 
-  final SupabaseClient _supabase = Supabase.instance.client;
+  // Getter para evaluación perezosa (lazy evaluation)
+  // Esto previene el error de acceso a Supabase antes de inicialización
+  SupabaseClient get _supabase => SupabaseConfig.client;
   late GooglePlace _googlePlace;
 
   // ========================================

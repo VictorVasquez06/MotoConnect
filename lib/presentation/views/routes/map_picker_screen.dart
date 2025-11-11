@@ -295,22 +295,28 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
             ),
         ],
       ),
-      body: Stack(
-        children: [
-          GoogleMap(
-            /* ... (sin cambios) ... */
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: widget.initialPosition ?? _defaultInitialPiedecuesta,
-              zoom: widget.initialPosition != null ? 16 : 12,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            GoogleMap(
+              /* ... (sin cambios) ... */
+              onMapCreated: _onMapCreated,
+              initialCameraPosition: CameraPosition(
+                target: widget.initialPosition ?? _defaultInitialPiedecuesta,
+                zoom: widget.initialPosition != null ? 16 : 12,
+              ),
+              onTap: _onTapMap,
+              markers: _marker != null ? {_marker!} : {},
+              myLocationButtonEnabled: true,
+              myLocationEnabled: true,
+              mapToolbarEnabled: false,
+              zoomControlsEnabled: false,
+              padding: const EdgeInsets.only(
+                top: 80,
+                bottom: 140,
+                right: 10,
+              ),
             ),
-            onTap: _onTapMap,
-            markers: _marker != null ? {_marker!} : {},
-            myLocationButtonEnabled: true,
-            myLocationEnabled: true,
-            mapToolbarEnabled: false,
-            zoomControlsEnabled: true,
-          ),
           Positioned(
             top: 10,
             left: 10,
@@ -322,6 +328,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                 children: [
                   TextField(
                     controller: _searchController,
+                    style: const TextStyle(color: Colors.black),
                     decoration: InputDecoration(
                       hintText: "Buscar dirección o lugar...",
                       prefixIcon: const Icon(Icons.search),
@@ -370,6 +377,34 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
               ),
             ),
           ),
+          // Botones de zoom personalizados
+          Positioned(
+            top: 80,
+            right: 10,
+            child: Column(
+              children: [
+                FloatingActionButton(
+                  heroTag: "zoom_in",
+                  mini: true,
+                  backgroundColor: Colors.white,
+                  child: const Icon(Icons.add, color: Colors.black),
+                  onPressed: () {
+                    _mapController?.animateCamera(CameraUpdate.zoomIn());
+                  },
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton(
+                  heroTag: "zoom_out",
+                  mini: true,
+                  backgroundColor: Colors.white,
+                  child: const Icon(Icons.remove, color: Colors.black),
+                  onPressed: () {
+                    _mapController?.animateCamera(CameraUpdate.zoomOut());
+                  },
+                ),
+              ],
+            ),
+          ),
           Positioned(
             // ... (Mostrar dirección actual, sin cambios) ...
             bottom: 70,
@@ -399,7 +434,8 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
               ),
             ),
           ),
-        ],
+          ],
+        ),
       ),
       floatingActionButton:
           _pickedLocation != null

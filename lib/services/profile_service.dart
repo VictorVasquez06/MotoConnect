@@ -1,7 +1,10 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/config/supabase_config.dart';
 
 class ProfileService {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  // Getter para evaluación perezosa (lazy evaluation)
+  // Esto previene el error de acceso a Supabase antes de inicialización
+  SupabaseClient get _supabase => SupabaseConfig.client;
 
   /// Obtener perfil del usuario actual
   Future<Map<String, dynamic>?> getCurrentUserProfile() async {

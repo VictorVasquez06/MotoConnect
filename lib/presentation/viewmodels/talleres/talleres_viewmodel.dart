@@ -13,6 +13,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/models/taller_model.dart';
+import '../../../core/config/supabase_config.dart';
 
 /// Clase auxiliar para combinar datos del taller con el nombre del creador
 class TallerConCreador {
@@ -30,7 +31,9 @@ class TalleresViewModel extends ChangeNotifier {
   // CLIENTE SUPABASE
   // ========================================
 
-  final SupabaseClient _supabase = Supabase.instance.client;
+  // Getter para evaluación perezosa (lazy evaluation)
+  // Esto previene el error de acceso a Supabase antes de inicialización
+  SupabaseClient get _supabase => SupabaseConfig.client;
 
   // ========================================
   // ESTADO

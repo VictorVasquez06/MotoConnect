@@ -9,6 +9,7 @@
 library;
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/config/supabase_config.dart';
 import '../../models/user_model.dart';
 
@@ -26,8 +27,9 @@ class AuthApiService {
   // CLIENTE SUPABASE
   // ========================================
 
-  /// Cliente de Supabase
-  final SupabaseClient _supabase = SupabaseConfig.client;
+  /// Cliente de Supabase - Getter para evaluación perezosa (lazy evaluation)
+  /// Esto previene el error de acceso a Supabase antes de inicialización
+  SupabaseClient get _supabase => SupabaseConfig.client;
 
   // ========================================
   // MÉTODOS PÚBLICOS
@@ -120,6 +122,65 @@ class AuthApiService {
       await _supabase.auth.resetPasswordForEmail(email);
     } catch (e) {
       throw AuthException('Error al enviar correo de recuperación');
+    }
+  }
+
+  /// Inicia sesión con Google
+  Future<UserModel> signInWithGoogle() async {
+    try {
+      // Configurar Google Sign In
+      // Web Client ID de Google Cloud Console (para Supabase)
+      const webClientId = SupabaseConfig.googleWebClientId;
+
+      // Inicializar Google Sign In
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        serverClientId: webClientId,
+        scopes: ['email', 'profile'],
+      );
+
+      // 1. Realizar el sign in con Google
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        throw AuthException('Inicio de sesión cancelado');
+      }
+
+      // 2. Obtener los tokens de autenticación
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final accessToken = googleAuth.accessToken;
+      final idToken = googleAuth.idToken;
+
+      if (accessToken == null || idToken == null) {
+        throw AuthException('Error al obtener tokens de Google');
+      }
+
+      // 3. Autenticar con Supabase usando los tokens de Google
+      final response = await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+
+      if (response.user == null) {
+        throw AuthException('Error al iniciar sesión con Google');
+      }
+
+      // 4. Crear el modelo de usuario
+      final user = response.user!;
+      return UserModel(
+        id: user.id,
+        email: user.email ?? '',
+        nombre: user.userMetadata?['full_name'] as String? ??
+            user.userMetadata?['name'] as String? ??
+            googleUser.displayName ??
+            '',
+      );
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      throw AuthException(_mapErrorMessage(e.toString()));
     }
   }
 

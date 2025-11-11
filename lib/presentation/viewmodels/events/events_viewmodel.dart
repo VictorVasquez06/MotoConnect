@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/models/event_model.dart';
 import '../../../data/repositories/event_repository.dart';
+import '../../../core/config/supabase_config.dart';
 
 /// Enum para representar los posibles estados de la carga de eventos.
 ///
@@ -17,7 +18,10 @@ enum EventStatus { initial, loading, success, error }
 class EventsViewModel extends ChangeNotifier {
   // Cambiado de EventService a EventRepository (patrón correcto)
   final EventRepository _eventRepository = EventRepository();
-  final SupabaseClient _supabase = Supabase.instance.client;
+
+  // Getter para evaluación perezosa (lazy evaluation)
+  // Esto previene el error de acceso a Supabase antes de inicialización
+  SupabaseClient get _supabase => SupabaseConfig.client;
 
   List<Event> _events = [];
   List<Event> get events => _events;

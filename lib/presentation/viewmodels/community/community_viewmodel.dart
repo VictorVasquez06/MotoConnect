@@ -13,6 +13,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/models/post_model.dart';
+import '../../../core/config/supabase_config.dart';
 
 /// Clase auxiliar para combinar datos de la publicación con información adicional
 class PublicacionConAutor {
@@ -41,7 +42,9 @@ class CommunityViewModel extends ChangeNotifier {
   // CLIENTE SUPABASE
   // ========================================
 
-  final SupabaseClient _supabase = Supabase.instance.client;
+  // Getter para evaluación perezosa (lazy evaluation)
+  // Esto previene el error de acceso a Supabase antes de inicialización
+  SupabaseClient get _supabase => SupabaseConfig.client;
 
   // ========================================
   // CONTROLADORES

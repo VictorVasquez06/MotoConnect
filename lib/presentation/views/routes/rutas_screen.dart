@@ -510,31 +510,36 @@ class _RutasScreenState extends State<RutasScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Mapa de Rutas")),
-      body: Stack(
-        children: [
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: _defaultPosition,
-              zoom: 13,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: _defaultPosition,
+                zoom: 13,
+              ),
+              onMapCreated: (controller) {
+                _mapController = controller;
+                // _getUserLocation(); // getUserLocation se llama en _checkPermission y a veces en onMapCreated.
+                // Si se maneja por didChangeDependencies, quizás no necesites llamarlo aquí de nuevo
+                // a menos que sea un fallback. Por ahora, lo dejo ya que estaba
+                // pero ten en cuenta que la ubicación y ruta podrían cargarse/actualizarse
+                // por didChangeDependencies
+              },
+              myLocationEnabled:
+                  true, // Esto ya muestra un punto azul, considera si _userMarker es siempre necesario
+              myLocationButtonEnabled: true,
+              markers: {
+                if (_userMarker != null)
+                  _userMarker!, // Podrías querer ocultar tu marcador si myLocationEnabled es true
+                if (_searchedMarker != null) _searchedMarker!,
+              },
+              polylines: _polylines,
+              padding: const EdgeInsets.only(
+                top: 80,  // Espacio para la barra de búsqueda
+                bottom: 100,  // Espacio para botones inferiores y navegación del sistema
+              ),
             ),
-            onMapCreated: (controller) {
-              _mapController = controller;
-              // _getUserLocation(); // getUserLocation se llama en _checkPermission y a veces en onMapCreated.
-              // Si se maneja por didChangeDependencies, quizás no necesites llamarlo aquí de nuevo
-              // a menos que sea un fallback. Por ahora, lo dejo ya que estaba
-              // pero ten en cuenta que la ubicación y ruta podrían cargarse/actualizarse
-              // por didChangeDependencies
-            },
-            myLocationEnabled:
-                true, // Esto ya muestra un punto azul, considera si _userMarker es siempre necesario
-            myLocationButtonEnabled: true,
-            markers: {
-              if (_userMarker != null)
-                _userMarker!, // Podrías querer ocultar tu marcador si myLocationEnabled es true
-              if (_searchedMarker != null) _searchedMarker!,
-            },
-            polylines: _polylines,
-          ),
           Positioned(
             top: 16,
             left: 16,
@@ -553,9 +558,11 @@ class _RutasScreenState extends State<RutasScreen> {
                       Expanded(
                         child: TextField(
                           controller: _searchController,
+                          style: const TextStyle(color: Colors.white),
                           onChanged: _autoCompleteSearch,
                           decoration: const InputDecoration(
                             hintText: "Buscar ubicación...",
+                            hintStyle: TextStyle(color: Colors.white70),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.all(15),
                           ),
@@ -578,8 +585,11 @@ class _RutasScreenState extends State<RutasScreen> {
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
                         return ListTile(
-                          leading: const Icon(Icons.location_on),
-                          title: Text(predictions[index].description ?? ""),
+                          leading: const Icon(Icons.location_on, color: Colors.black),
+                          title: Text(
+                            predictions[index].description ?? "",
+                            style: const TextStyle(color: Colors.black),
+                          ),
                           onTap: () => _selectPrediction(predictions[index]),
                         );
                       },
@@ -651,7 +661,8 @@ class _RutasScreenState extends State<RutasScreen> {
           ),
           // if (_cargando) // Descomentar si usas un indicador de carga
           //   const Center(child: CircularProgressIndicator()),
-        ],
+          ],
+        ),
       ),
     );
   }

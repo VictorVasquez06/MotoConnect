@@ -130,4 +130,19 @@ class AuthRepository {
       rethrow;
     }
   }
+
+  /// Inicia sesión con Google
+  ///
+  /// Retorna:
+  /// - UserModel del usuario autenticado con Google
+  ///
+  /// Lanza:
+  /// - AuthException si el proceso falla o es cancelado
+  Future<UserModel> signInWithGoogle() async {
+    try {
+      return await _apiService.signInWithGoogle();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

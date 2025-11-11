@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/config/supabase_config.dart';
 
 /// Estados posibles del perfil
 enum ProfileStatus { initial, loading, loaded, saving, saved, error }
@@ -43,14 +44,16 @@ class ProfileViewModel extends ChangeNotifier {
   bool _hasUnsavedChanges = false;
   bool get hasUnsavedChanges => _hasUnsavedChanges;
 
-  /// Usuario actual
-  User? get currentUser => _supabase.auth.currentUser;
-
   // ========================================
   // CLIENTE SUPABASE
   // ========================================
 
-  final SupabaseClient _supabase = Supabase.instance.client;
+  // Getter para evaluación perezosa (lazy evaluation)
+  // Esto previene el error de acceso a Supabase antes de inicialización
+  SupabaseClient get _supabase => SupabaseConfig.client;
+
+  /// Usuario actual
+  User? get currentUser => _supabase.auth.currentUser;
 
   // ========================================
   // CONSTRUCTOR

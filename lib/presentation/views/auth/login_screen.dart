@@ -106,8 +106,29 @@ class _LoginViewBody extends StatelessWidget {
                             : () async {
                               final message = await viewModel.resetPassword();
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(message)),
+                                // Mostrar diálogo con el resultado
+                                showDialog(
+                                  context: context,
+                                  builder:
+                                      (context) => AlertDialog(
+                                        title: Text(
+                                          message.contains('Por favor')
+                                              ? 'Atención'
+                                              : 'Correo Enviado',
+                                        ),
+                                        content: Text(
+                                          message.contains('Por favor')
+                                              ? message
+                                              : '$message\n\nRevisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña.',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed:
+                                                () => Navigator.pop(context),
+                                            child: const Text('Aceptar'),
+                                          ),
+                                        ],
+                                      ),
                                 );
                               }
                             },
@@ -125,7 +146,7 @@ class _LoginViewBody extends StatelessWidget {
                 // Muestra un indicador de progreso si está cargando, si no, los botones.
                 if (viewModel.isLoading)
                   const CircularProgressIndicator(color: Colors.orangeAccent)
-                else
+                else ...[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -149,6 +170,71 @@ class _LoginViewBody extends StatelessWidget {
                       ),
                     ],
                   ),
+
+                  // Divisor "O"
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Divider(color: Colors.white.withOpacity(0.5)),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'O',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(color: Colors.white.withOpacity(0.5)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Botón de Google Sign In
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final success = await viewModel.signInWithGoogle();
+                        if (success && context.mounted) {
+                          Navigator.pushReplacementNamed(context, '/home');
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black87,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      icon: Image.asset(
+                        'assets/images/google_logo.png',
+                        height: 24,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Si no existe el logo, mostrar ícono genérico
+                          return const Icon(
+                            Icons.g_mobiledata,
+                            size: 32,
+                            color: Colors.blue,
+                          );
+                        },
+                      ),
+                      label: const Text(
+                        'Continuar con Google',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

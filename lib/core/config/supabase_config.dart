@@ -19,6 +19,22 @@ class SupabaseConfig {
   // Singleton pattern para asegurar una sola instancia
   static SupabaseClient? _instance;
 
+  // ========================================
+  // GOOGLE SIGN IN CONFIGURATION
+  // ========================================
+
+  /// Web Client ID de Google Cloud Console
+  ///
+  /// Para obtenerlo:
+  /// 1. Ve a Google Cloud Console (https://console.cloud.google.com)
+  /// 2. Selecciona tu proyecto
+  /// 3. Ve a "APIs & Services" > "Credentials"
+  /// 4. Copia el "Web Client ID" (NO el Android Client ID)
+  ///
+  /// Formato: xxxxx-xxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com
+  static const String googleWebClientId =
+      '415398342187-13nqmdhvg95ieat9ffj2bj8nvvj68ck6.apps.googleusercontent.com';
+
   /// Obtiene la instancia actual del cliente Supabase
   ///
   /// Lanza una excepción si no ha sido inicializado

@@ -10,12 +10,12 @@ class ApiConstants {
 
   /// URL base de Supabase
   /// NOTA: Reemplazar con tu URL real en producción
-  static const String supabaseUrl =
-      'https://supabase.com/dashboard/project/wzxmlerfiyvniclsgyub';
+  static const String supabaseUrl = 'https://otxzwutudsruildrtuzy.supabase.co';
 
   /// Clave anónima de Supabase
   /// NOTA: Reemplazar con tu clave real en producción
-  static const String supabaseAnonKey = '0POiuyt06*.';
+  static const String supabaseAnonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90eHp3dXR1ZHNydWlsZHJ0dXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NDk2OTIsImV4cCI6MjA3ODQyNTY5Mn0.cAfcpSPDGdfDDNbk6bq6KiGdzuQhsOLUAcGz7dNwE5w';
 
   // ========================================
   // GOOGLE MAPS

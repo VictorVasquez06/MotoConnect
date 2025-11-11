@@ -85,6 +85,22 @@ class LoginViewModel extends ChangeNotifier {
     return message;
   }
 
+  /// Lógica para iniciar sesión con Google
+  Future<bool> signInWithGoogle() async {
+    _setLoading(true);
+    _setErrorMessage(null);
+
+    try {
+      await _authRepository.signInWithGoogle();
+      _setLoading(false);
+      return true; // Éxito
+    } catch (e) {
+      _setErrorMessage(e.toString());
+      _setLoading(false);
+      return false; // Fracaso
+    }
+  }
+
   @override
   void dispose() {
     // Limpia los controladores cuando el ViewModel ya no se necesite.

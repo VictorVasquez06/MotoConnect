@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/config/supabase_config.dart';
 
 /// Estados posibles de la pantalla de rutas guardadas
 enum SavedRoutesStatus { initial, loading, loaded, error }
@@ -20,7 +21,9 @@ class SavedRoutesViewModel extends ChangeNotifier {
   // CLIENTE SUPABASE
   // ========================================
 
-  final SupabaseClient _supabase = Supabase.instance.client;
+  // Getter para evaluación perezosa (lazy evaluation)
+  // Esto previene el error de acceso a Supabase antes de inicialización
+  SupabaseClient get _supabase => SupabaseConfig.client;
 
   // ========================================
   // ESTADO

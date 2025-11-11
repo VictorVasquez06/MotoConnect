@@ -111,6 +111,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
                     // Campo de nombre
                     TextFormField(
                       controller: _nombreController,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
@@ -135,6 +136,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
                     // Campo de email
                     TextFormField(
                       controller: _emailController,
+                      style: const TextStyle(color: Colors.black),
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         filled: true,
@@ -160,6 +162,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
                     // Campo de contraseña
                     TextFormField(
                       controller: _passwordController,
+                      style: const TextStyle(color: Colors.black),
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         filled: true,
@@ -197,6 +200,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
                     // Confirmar contraseña
                     TextFormField(
                       controller: _confirmarPasswordController,
+                      style: const TextStyle(color: Colors.black),
                       obscureText: _obscureConfirmPassword,
                       decoration: InputDecoration(
                         filled: true,

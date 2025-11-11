@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // 👈 IMPORTANTE: Importar provider
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'core/config/supabase_config.dart'; // 👈 IMPORTANTE: Importar SupabaseConfig
 
 // SCREENS - Archivos en lib/presentation/views/
 import 'presentation/views/auth/splash_screen.dart';
@@ -18,19 +19,35 @@ import 'presentation/views/talleres/talleres_screen.dart';
 import 'presentation/views/community/community_screen.dart';
 import 'presentation/views/routes/map_picker_screen.dart';
 
+// VIEWMODELS - 👈 IMPORTANTE: Importar ViewModels
+import 'presentation/viewmodels/auth/splash_viewmodel.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Inicializa el formato de fechas para español
   await initializeDateFormatting('es_ES', null);
 
-  // Inicializa Supabase
-  await Supabase.initialize(
-    url: 'TU_SUPABASE_URL', // https://xxx.supabase.co
-    anonKey: 'TU_SUPABASE_ANON_KEY',
+  // Inicializa Supabase usando SupabaseConfig
+  await SupabaseConfig.initialize(
+    url: 'https://otxzwutudsruildrtuzy.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90eHp3dXR1ZHNydWlsZHJ0dXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NDk2OTIsImV4cCI6MjA3ODQyNTY5Mn0.cAfcpSPDGdfDDNbk6bq6KiGdzuQhsOLUAcGz7dNwE5w',
   );
 
-  runApp(const MotoConnectApp());
+  // 👇 IMPORTANTE: Envolver con MultiProvider
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SplashViewModel()),
+        // Aquí puedes agregar más providers conforme los necesites
+        // Por ejemplo:
+        // ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        // ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+      ],
+      child: const MotoConnectApp(),
+    ),
+  );
 }
 
 class MotoConnectApp extends StatelessWidget {

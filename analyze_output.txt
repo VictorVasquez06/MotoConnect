@@ -1,217 +1,31 @@
-Resolving dependencies...
-Downloading packages...
-  app_links 6.4.0 (6.4.1 available)
-  characters 1.4.0 (1.4.1 available)
-  crypto 3.0.6 (3.0.7 available)
-  flutter_lints 5.0.0 (6.0.0 available)
-  flutter_plugin_android_lifecycle 2.0.28 (2.0.32 available)
-  flutter_polyline_points 1.0.0 (3.1.0 available)
-  flutter_secure_storage_linux 1.2.3 (2.0.1 available)
-  flutter_secure_storage_macos 3.1.3 (4.0.0 available)
-  flutter_secure_storage_platform_interface 1.1.2 (2.0.1 available)
-  flutter_secure_storage_web 1.2.1 (2.0.0 available)
-  flutter_secure_storage_windows 3.1.2 (4.0.0 available)
-  functions_client 2.4.2 (2.5.0 available)
-  geocoding_android 4.0.0 (4.0.1 available)
-  geocoding_ios 3.0.2 (3.1.0 available)
-  geolocator 11.1.0 (14.0.2 available)
-  geolocator_android 4.6.2 (5.0.2 available)
-  geolocator_web 3.0.0 (4.1.3 available)
-  google_maps 8.1.1 (8.2.0 available)
-  google_maps_flutter 2.12.1 (2.14.0 available)
-  google_maps_flutter_android 2.16.1 (2.18.4 available)
-  google_maps_flutter_ios 2.15.1 (2.15.5 available)
-  google_maps_flutter_platform_interface 2.11.1 (2.14.0 available)
-  google_maps_flutter_web 0.5.12 (0.5.14+2 available)
-  google_place 0.4.7 (discontinued)
-  google_sign_in 6.3.0 (7.2.0 available)
-  google_sign_in_android 6.2.1 (7.2.2 available)
-  google_sign_in_ios 5.9.0 (6.2.3 available)
-  google_sign_in_platform_interface 2.5.0 (3.1.0 available)
-  google_sign_in_web 0.12.4+4 (1.1.0 available)
-  gotrue 2.12.0 (2.16.0 available)
-  html 0.15.5+1 (0.15.6 available)
-  http 0.13.6 (1.6.0 available)
-  js 0.6.7 (0.7.2 available)
-  lints 5.1.1 (6.0.0 available)
-  material_color_utilities 0.11.1 (0.13.0 available)
-  meta 1.16.0 (1.17.0 available)
-  path_provider_android 2.2.17 (2.2.20 available)
-  path_provider_foundation 2.4.1 (2.4.3 available)
-  permission_handler 11.4.0 (12.0.1 available)
-  permission_handler_android 12.1.0 (13.0.1 available)
-  postgrest 2.4.2 (2.5.0 available)
-  realtime_client 2.5.0 (2.6.0 available)
-  shared_preferences_android 2.4.10 (2.4.15 available)
-  shared_preferences_foundation 2.5.4 (2.5.5 available)
-  storage_client 2.4.0 (2.4.1 available)
-  supabase 2.7.0 (2.10.0 available)
-  supabase_flutter 2.9.0 (2.10.3 available)
-  test_api 0.7.6 (0.7.7 available)
-  url_launcher 6.3.1 (6.3.2 available)
-  url_launcher_android 6.3.16 (6.3.24 available)
-  url_launcher_ios 6.3.3 (6.3.5 available)
-  url_launcher_macos 3.2.2 (3.2.4 available)
-  uuid 4.5.1 (4.5.2 available)
-  vm_service 15.0.0 (15.0.2 available)
-  web 0.5.1 (1.1.1 available)
-Got dependencies!
-1 package is discontinued.
-54 packages have newer versions incompatible with dependency constraints.
-Try `flutter pub outdated` for more information.
 Analyzing MotoConnect...                                        
 
+warning - Unnecessary type check; the result is always 'true' - lib\data\repositories\taller_repository.dart:232:11 - unnecessary_type_check
 warning - The operand can't be 'null', so the condition is always 'true' - lib\domain\usecases\events\get_event_details_usecase.dart:157:20 - unnecessary_null_comparison
 warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\events\get_event_details_usecase.dart:159:35 - unnecessary_non_null_assertion
 warning - The value of the local variable 'category' isn't used - lib\domain\usecases\events\get_events_usecase.dart:103:13 - unused_local_variable
 warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\events\join_event_usecase.dart:102:40 - unnecessary_non_null_assertion
 warning - The operand can't be 'null', so the condition is always 'true' - lib\domain\usecases\events\join_event_usecase.dart:130:20 - unnecessary_null_comparison
 warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\events\join_event_usecase.dart:130:41 - unnecessary_non_null_assertion
-warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\delete_route_usecase.dart:277:34 - dead_null_aware_expression
-  error - The named parameter 'filters' isn't defined - lib\domain\usecases\routes\get_routes_usecase.dart:52:9 - undefined_named_parameter
-  error - The named parameter 'limit' isn't defined - lib\domain\usecases\routes\get_routes_usecase.dart:53:9 - undefined_named_parameter
-  error - The named parameter 'offset' isn't defined - lib\domain\usecases\routes\get_routes_usecase.dart:54:9 - undefined_named_parameter
-warning - The operand can't be 'null', so the condition is always 'false' - lib\domain\usecases\routes\get_routes_usecase.dart:268:27 - unnecessary_null_comparison
-warning - The operand can't be 'null', so the condition is always 'false' - lib\domain\usecases\routes\get_routes_usecase.dart:268:50 - unnecessary_null_comparison
-warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\routes\get_routes_usecase.dart:269:29 - unnecessary_non_null_assertion
-warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\routes\get_routes_usecase.dart:269:52 - unnecessary_non_null_assertion
-  error - 1 positional argument expected by 'getSavedRoutesForUser', but 0 found - lib\domain\usecases\routes\get_saved_routes_usecase.dart:53:9 - not_enough_positional_arguments
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:53:9 - undefined_named_parameter
-  error - The named parameter 'filters' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:54:9 - undefined_named_parameter
-  error - The named parameter 'limit' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:55:9 - undefined_named_parameter
-  error - The named parameter 'offset' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:56:9 - undefined_named_parameter
-  error - 1 positional argument expected by 'getRoutesCreatedByUser', but 0 found - lib\domain\usecases\routes\get_saved_routes_usecase.dart:63:11 - not_enough_positional_arguments
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:63:11 - undefined_named_parameter
-  error - The named parameter 'filters' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:64:11 - undefined_named_parameter
-  error - 1 positional argument expected by 'getRoutesCreatedByUser', but 0 found - lib\domain\usecases\routes\get_saved_routes_usecase.dart:93:9 - not_enough_positional_arguments
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:93:9 - undefined_named_parameter
-  error - The named parameter 'filters' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:94:9 - undefined_named_parameter
-  error - 1 positional argument expected by 'getSavedRoutesForUser', but 0 found - lib\domain\usecases\routes\get_saved_routes_usecase.dart:116:9 - not_enough_positional_arguments
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:116:9 - undefined_named_parameter
-  error - The named parameter 'limit' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:117:9 - undefined_named_parameter
-  error - The named parameter 'offset' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:118:9 - undefined_named_parameter
-  error - 1 positional argument expected by 'getSavedRoutesForUser', but 0 found - lib\domain\usecases\routes\get_saved_routes_usecase.dart:181:9 - not_enough_positional_arguments
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:181:9 - undefined_named_parameter
-  error - The named parameter 'limit' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:182:9 - undefined_named_parameter
-  error - The named parameter 'offset' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:183:9 - undefined_named_parameter
-  error - 1 positional argument expected by 'getRoutesCreatedByUser', but 0 found - lib\domain\usecases\routes\get_saved_routes_usecase.dart:187:9 - not_enough_positional_arguments
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:187:9 - undefined_named_parameter
-  error - 1 positional argument expected by 'getSavedRoutesForUser', but 0 found - lib\domain\usecases\routes\get_saved_routes_usecase.dart:217:9 - not_enough_positional_arguments
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:217:9 - undefined_named_parameter
-  error - The named parameter 'limit' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:218:9 - undefined_named_parameter
-  error - The named parameter 'offset' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:219:9 - undefined_named_parameter
-warning - The receiver can't be null, so the null-aware operator '?.' is unnecessary - lib\domain\usecases\routes\get_saved_routes_usecase.dart:227:40 - invalid_null_aware_operator
-  error - 2 positional arguments expected by 'isRouteSavedByUser', but 0 found - lib\domain\usecases\routes\get_saved_routes_usecase.dart:257:9 - not_enough_positional_arguments
-  error - The named parameter 'routeId' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:257:9 - undefined_named_parameter
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\routes\get_saved_routes_usecase.dart:258:9 - undefined_named_parameter
-warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\routes\get_saved_routes_usecase.dart:324:19 - unnecessary_non_null_assertion
-warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\routes\get_saved_routes_usecase.dart:328:19 - unnecessary_non_null_assertion
-warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\get_saved_routes_usecase.dart:357:35 - dead_null_aware_expression
-warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\get_saved_routes_usecase.dart:358:35 - dead_null_aware_expression
-warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\get_saved_routes_usecase.dart:367:40 - dead_null_aware_expression
-warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\get_saved_routes_usecase.dart:368:40 - dead_null_aware_expression
-   info - Angle brackets will be interpreted as HTML - lib\domain\usecases\routes\save_route_usecase.dart:25:24 - unintended_html_in_doc_comment
-   info - Angle brackets will be interpreted as HTML - lib\domain\usecases\routes\save_route_usecase.dart:26:22 - unintended_html_in_doc_comment
-   info - Angle brackets will be interpreted as HTML - lib\domain\usecases\routes\save_route_usecase.dart:27:24 - unintended_html_in_doc_comment
-  error - The named parameter 'nombreRuta' is required, but there's no corresponding argument - lib\domain\usecases\routes\save_route_usecase.dart:54:44 - missing_required_argument
-  error - The named parameter 'puntos' is required, but there's no corresponding argument - lib\domain\usecases\routes\save_route_usecase.dart:54:44 - missing_required_argument
-  error - The named parameter 'userId' is required, but there's no corresponding argument - lib\domain\usecases\routes\save_route_usecase.dart:54:44 - missing_required_argument
-  error - Too many positional arguments: 0 expected, but 1 found - lib\domain\usecases\routes\save_route_usecase.dart:54:56 - extra_positional_arguments_could_be_named
-  error - 2 positional arguments expected by 'isRouteSavedByUser', but 0 found - lib\domain\usecases\routes\save_route_usecase.dart:93:9 - not_enough_positional_arguments
-  error - The named parameter 'routeId' isn't defined - lib\domain\usecases\routes\save_route_usecase.dart:93:9 - undefined_named_parameter
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\routes\save_route_usecase.dart:94:9 - undefined_named_parameter
-  error - 2 positional arguments expected by 'saveRouteForUser', but 0 found - lib\domain\usecases\routes\save_route_usecase.dart:103:9 - not_enough_positional_arguments
-  error - The named parameter 'routeId' isn't defined - lib\domain\usecases\routes\save_route_usecase.dart:103:9 - undefined_named_parameter
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\routes\save_route_usecase.dart:104:9 - undefined_named_parameter
-  error - This expression has a type of 'void' so its value can't be used - lib\domain\usecases\routes\save_route_usecase.dart:107:20 - use_of_void_result
-  error - The named parameter 'nombreRuta' is required, but there's no corresponding argument - lib\domain\usecases\routes\save_route_usecase.dart:152:47 - missing_required_argument
-  error - The named parameter 'puntos' is required, but there's no corresponding argument - lib\domain\usecases\routes\save_route_usecase.dart:152:47 - missing_required_argument
-  error - The named parameter 'userId' is required, but there's no corresponding argument - lib\domain\usecases\routes\save_route_usecase.dart:152:47 - missing_required_argument
-  error - Too many positional arguments: 0 expected, but 1 found - lib\domain\usecases\routes\save_route_usecase.dart:152:59 - extra_positional_arguments_could_be_named
-  error - The named parameter 'limit' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:120:9 - undefined_named_parameter
-  error - 2 positional arguments expected by 'isFavoriteTaller', but 0 found - lib\domain\usecases\talleres\get_taller_details_usecase.dart:133:11 - not_enough_positional_arguments
-  error - The named parameter 'tallerId' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:133:11 - undefined_named_parameter
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:134:11 - undefined_named_parameter
-   info - Uses 'await' on an instance of 'double', which is not a subtype of 'Future' - lib\domain\usecases\talleres\get_taller_details_usecase.dart:141:22 - await_only_futures
-  error - 3 positional arguments expected by 'calculateDistance', but 0 found - lib\domain\usecases\talleres\get_taller_details_usecase.dart:142:11 - not_enough_positional_arguments
-  error - The named parameter 'fromLatitude' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:142:11 - undefined_named_parameter
-  error - The named parameter 'fromLongitude' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:143:11 - undefined_named_parameter
-  error - The named parameter 'toLatitude' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:144:11 - undefined_named_parameter
-  error - The named parameter 'toLongitude' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:145:11 - undefined_named_parameter
-  error - The argument type 'Map<String, dynamic>?' can't be assigned to the parameter type 'List<TallerSchedule>'.  - lib\domain\usecases\talleres\get_taller_details_usecase.dart:151:19 - argument_type_not_assignable
-  error - The argument type 'List<String>' can't be assigned to the parameter type 'List<TallerService>'.  - lib\domain\usecases\talleres\get_taller_details_usecase.dart:152:19 - argument_type_not_assignable
-  error - The argument type 'List<Map<String, dynamic>>' can't be assigned to the parameter type 'List<TallerReview>'.  - lib\domain\usecases\talleres\get_taller_details_usecase.dart:153:18 - argument_type_not_assignable
-  error - A value of type 'Map<String, dynamic>?' can't be returned from the method 'getSchedule' because it has a return type of 'Future<List<TallerSchedule>>' - lib\domain\usecases\talleres\get_taller_details_usecase.dart:186:14 - return_of_invalid_type
-  error - A value of type 'List<String>' can't be returned from the method 'getServices' because it has a return type of 'Future<List<TallerService>>' - lib\domain\usecases\talleres\get_taller_details_usecase.dart:197:14 - return_of_invalid_type
-  error - A value of type 'List<Map<String, dynamic>>' can't be returned from the method 'getReviews' because it has a return type of 'Future<List<TallerReview>>' - lib\domain\usecases\talleres\get_taller_details_usecase.dart:214:14 - return_of_invalid_type
-  error - 1 positional argument expected by 'getTallerReviewsPaginated', but 0 found - lib\domain\usecases\talleres\get_taller_details_usecase.dart:215:9 - not_enough_positional_arguments
-  error - The named parameter 'tallerId' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:215:9 - undefined_named_parameter
-  error - The named parameter 'limit' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:217:9 - undefined_named_parameter
-  error - 2 positional arguments expected by 'addToFavorites', but 0 found - lib\domain\usecases\talleres\get_taller_details_usecase.dart:248:11 - not_enough_positional_arguments
-  error - The named parameter 'tallerId' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:248:11 - undefined_named_parameter
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:249:11 - undefined_named_parameter
-  error - 2 positional arguments expected by 'removeFromFavorites', but 0 found - lib\domain\usecases\talleres\get_taller_details_usecase.dart:253:11 - not_enough_positional_arguments
-  error - The named parameter 'tallerId' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:253:11 - undefined_named_parameter
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\talleres\get_taller_details_usecase.dart:254:11 - undefined_named_parameter
-  error - Too many positional arguments: 0 expected, but 1 found - lib\domain\usecases\talleres\get_talleres_usecase.dart:88:68 - extra_positional_arguments_could_be_named
-  error - 1 positional argument expected by 'getTalleresFiltered', but 0 found - lib\domain\usecases\talleres\get_talleres_usecase.dart:111:9 - not_enough_positional_arguments
-  error - The named parameter 'minRating' isn't defined - lib\domain\usecases\talleres\get_talleres_usecase.dart:111:9 - undefined_named_parameter
-  error - The named parameter 'maxDistance' isn't defined - lib\domain\usecases\talleres\get_talleres_usecase.dart:112:9 - undefined_named_parameter
-  error - The named parameter 'categories' isn't defined - lib\domain\usecases\talleres\get_talleres_usecase.dart:113:9 - undefined_named_parameter
-  error - The named parameter 'isOpen' isn't defined - lib\domain\usecases\talleres\get_talleres_usecase.dart:114:9 - undefined_named_parameter
-  error - The named parameter 'userLatitude' isn't defined - lib\domain\usecases\talleres\get_talleres_usecase.dart:115:9 - undefined_named_parameter
-  error - The named parameter 'userLongitude' isn't defined - lib\domain\usecases\talleres\get_talleres_usecase.dart:116:9 - undefined_named_parameter
-  error - The named parameter 'limit' isn't defined - lib\domain\usecases\talleres\get_talleres_usecase.dart:147:9 - undefined_named_parameter
-  error - 2 positional arguments expected by 'hasUserRatedTaller', but 0 found - lib\domain\usecases\talleres\rate_taller_usecase.dart:82:9 - not_enough_positional_arguments
-  error - The named parameter 'tallerId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:82:9 - undefined_named_parameter
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:83:9 - undefined_named_parameter
-  error - The argument type 'double' can't be assigned to the parameter type 'int'.  - lib\domain\usecases\talleres\rate_taller_usecase.dart:93:17 - argument_type_not_assignable
-  error - The named parameter 'images' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:95:9 - undefined_named_parameter
-  error - The named parameter 'categoryRatings' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:96:9 - undefined_named_parameter
-  error - A value of type 'String' can't be returned from the method 'call' because it has a return type of 'Future<TallerRating>' - lib\domain\usecases\talleres\rate_taller_usecase.dart:99:14 - return_of_invalid_type
-  error - The argument type 'List<String>' can't be assigned to the parameter type 'String'.  - lib\domain\usecases\talleres\rate_taller_usecase.dart:130:68 - argument_type_not_assignable
-  error - 2 positional arguments expected by 'uploadRatingImages', but 1 found - lib\domain\usecases\talleres\rate_taller_usecase.dart:130:78 - not_enough_positional_arguments
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:181:9 - undefined_named_parameter
-  error - The argument type 'double' can't be assigned to the parameter type 'int?'.  - lib\domain\usecases\talleres\rate_taller_usecase.dart:182:17 - argument_type_not_assignable
-  error - The named parameter 'images' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:184:9 - undefined_named_parameter
-  error - The named parameter 'categoryRatings' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:185:9 - undefined_named_parameter
-  error - A value of type 'void' can't be returned from the method 'editRating' because it has a return type of 'Future<TallerRating>' - lib\domain\usecases\talleres\rate_taller_usecase.dart:188:14 - return_of_invalid_type
-  error - 1 positional argument expected by 'deleteRating', but 0 found - lib\domain\usecases\talleres\rate_taller_usecase.dart:204:9 - not_enough_positional_arguments
-  error - The named parameter 'ratingId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:204:9 - undefined_named_parameter
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:205:9 - undefined_named_parameter
-  error - A value of type 'Map<String, dynamic>?' can't be returned from the method 'getUserRating' because it has a return type of 'Future<TallerRating?>' - lib\domain\usecases\talleres\rate_taller_usecase.dart:224:14 - return_of_invalid_type
-  error - 2 positional arguments expected by 'getUserRatingForTaller', but 0 found - lib\domain\usecases\talleres\rate_taller_usecase.dart:225:9 - not_enough_positional_arguments
-  error - The named parameter 'tallerId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:225:9 - undefined_named_parameter
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:226:9 - undefined_named_parameter
-  error - 2 positional arguments expected by 'hasUserRatedTaller', but 0 found - lib\domain\usecases\talleres\rate_taller_usecase.dart:243:9 - not_enough_positional_arguments
-  error - The named parameter 'tallerId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:243:9 - undefined_named_parameter
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:244:9 - undefined_named_parameter
-  error - 2 positional arguments expected by 'likeRating', but 0 found - lib\domain\usecases\talleres\rate_taller_usecase.dart:287:9 - not_enough_positional_arguments
-  error - The named parameter 'ratingId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:287:9 - undefined_named_parameter
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:288:9 - undefined_named_parameter
-  error - 2 positional arguments expected by 'unlikeRating', but 0 found - lib\domain\usecases\talleres\rate_taller_usecase.dart:306:9 - not_enough_positional_arguments
-  error - The named parameter 'ratingId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:306:9 - undefined_named_parameter
-  error - The named parameter 'userId' isn't defined - lib\domain\usecases\talleres\rate_taller_usecase.dart:307:9 - undefined_named_parameter
-  error - Target of URI doesn't exist: 'screens/splash_screen.dart' - lib\main.dart:7:8 - uri_does_not_exist
-  error - Target of URI doesn't exist: 'screens/registro_screen.dart' - lib\main.dart:9:8 - uri_does_not_exist
-  error - Target of URI doesn't exist: 'screens/home_screen.dart' - lib\main.dart:10:8 - uri_does_not_exist
-  error - Target of URI doesn't exist: 'screens/perfil_sreen.dart' - lib\main.dart:11:8 - uri_does_not_exist
-  error - Target of URI doesn't exist: 'views/eventos_view.dart' - lib\main.dart:14:8 - uri_does_not_exist
-  error - Target of URI doesn't exist: 'views/rutas_screen.dart' - lib\main.dart:15:8 - uri_does_not_exist
-  error - Target of URI doesn't exist: 'views/rutas_guardadas_screen.dart' - lib\main.dart:16:8 - uri_does_not_exist
-  error - Target of URI doesn't exist: 'views/talleres_screen.dart' - lib\main.dart:17:8 - uri_does_not_exist
-  error - Target of URI doesn't exist: 'views/comunidad_screen.dart' - lib\main.dart:18:8 - uri_does_not_exist
-  error - Target of URI doesn't exist: 'views/map_picker_screen.dart' - lib\main.dart:19:8 - uri_does_not_exist
-  error - The name 'SplashScreen' isn't a class - lib\main.dart:133:39 - creation_with_non_type
-  error - The name 'RegistroScreen' isn't a class - lib\main.dart:135:41 - creation_with_non_type
-  error - The name 'HomeScreen' isn't a class - lib\main.dart:136:37 - creation_with_non_type
-  error - The name 'PerfilScreen' isn't a class - lib\main.dart:137:39 - creation_with_non_type
-  error - The name 'EventosScreen' isn't a class - lib\main.dart:138:40 - creation_with_non_type
-  error - The method 'RutasScreen' isn't defined for the type 'MotoConnectApp' - lib\main.dart:145:18 - undefined_method
-  error - The name 'RutasRecomendadasScreen' isn't a class - lib\main.dart:147:51 - creation_with_non_type
-  error - The name 'TalleresScreen' isn't a class - lib\main.dart:148:41 - creation_with_non_type
-  error - The name 'ComunidadScreen' isn't a class - lib\main.dart:149:42 - creation_with_non_type
-  error - The method 'MapPickerScreen' isn't defined for the type 'MotoConnectApp' - lib\main.dart:154:18 - undefined_method
+warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\delete_route_usecase.dart:274:34 - dead_null_aware_expression
+warning - The operand can't be 'null', so the condition is always 'false' - lib\domain\usecases\routes\get_routes_usecase.dart:256:27 - unnecessary_null_comparison
+warning - The operand can't be 'null', so the condition is always 'false' - lib\domain\usecases\routes\get_routes_usecase.dart:256:50 - unnecessary_null_comparison
+warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\routes\get_routes_usecase.dart:257:29 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\routes\get_routes_usecase.dart:257:52 - unnecessary_non_null_assertion
+warning - The operand can't be 'null', so the condition is always 'true' - lib\domain\usecases\routes\get_saved_routes_usecase.dart:57:18 - unnecessary_null_comparison
+warning - The operand can't be 'null', so the condition is always 'true' - lib\domain\usecases\routes\get_saved_routes_usecase.dart:60:17 - unnecessary_null_comparison
+warning - The receiver can't be null, so the null-aware operator '?.' is unnecessary - lib\domain\usecases\routes\get_saved_routes_usecase.dart:230:40 - invalid_null_aware_operator
+warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\routes\get_saved_routes_usecase.dart:327:19 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\routes\get_saved_routes_usecase.dart:331:19 - unnecessary_non_null_assertion
+warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\get_saved_routes_usecase.dart:360:35 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\get_saved_routes_usecase.dart:361:35 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\get_saved_routes_usecase.dart:370:40 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\get_saved_routes_usecase.dart:371:40 - dead_null_aware_expression
+   info - Angle brackets will be interpreted as HTML - lib\domain\usecases\routes\save_route_usecase.dart:26:24 - unintended_html_in_doc_comment
+   info - Angle brackets will be interpreted as HTML - lib\domain\usecases\routes\save_route_usecase.dart:27:22 - unintended_html_in_doc_comment
+   info - Angle brackets will be interpreted as HTML - lib\domain\usecases\routes\save_route_usecase.dart:28:24 - unintended_html_in_doc_comment
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\auth\login_screen.dart:179:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\auth\login_screen.dart:192:60 - deprecated_member_use
    info - Don't invoke 'print' in production code - lib\presentation\views\community\community_screen.dart:68:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\presentation\views\community\community_screen.dart:110:13 - avoid_print
    info - Don't invoke 'print' in production code - lib\presentation\views\community\community_screen.dart:133:13 - avoid_print
@@ -221,59 +35,15 @@ warning - The left operand can't be null, so the right operand is never executed
 warning - The left operand can't be null, so the right operand is never executed - lib\presentation\views\community\post_detail_screen.dart:218:42 - dead_null_aware_expression
 warning - The left operand can't be null, so the right operand is never executed - lib\presentation\views\community\post_detail_screen.dart:227:45 - dead_null_aware_expression
 warning - The left operand can't be null, so the right operand is never executed - lib\presentation\views\community\post_detail_screen.dart:286:51 - dead_null_aware_expression
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\community\post_detail_screen.dart:376:33 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\community\post_detail_screen.dart:409:32 - deprecated_member_use
-  error - The method 'loadEventDetail' isn't defined for the type 'EventsViewModel' - lib\presentation\views\events\event_detail_screen.dart:20:39 - undefined_method
-  error - The getter 'isLoading' isn't defined for the type 'EventsViewModel' - lib\presentation\views\events\event_detail_screen.dart:29:25 - undefined_getter
-  error - The getter 'selectedEvent' isn't defined for the type 'EventsViewModel' - lib\presentation\views\events\event_detail_screen.dart:33:35 - undefined_getter
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\events\event_detail_screen.dart:108:56 - deprecated_member_use
-  error - The getter 'time' isn't defined for the type 'EventModel' - lib\presentation\views\events\event_detail_screen.dart:136:21 - undefined_getter
-  error - The getter 'participantsCount' isn't defined for the type 'EventModel' - lib\presentation\views\events\event_detail_screen.dart:142:24 - undefined_getter
-  error - The getter 'participantsCount' isn't defined for the type 'EventModel' - lib\presentation\views\events\event_detail_screen.dart:149:26 - undefined_getter
-warning - The left operand can't be null, so the right operand is never executed - lib\presentation\views\events\event_detail_screen.dart:202:32 - dead_null_aware_expression
-warning - The left operand can't be null, so the right operand is never executed - lib\presentation\views\events\event_detail_screen.dart:240:33 - dead_null_aware_expression
-  error - The getter 'participantsCount' isn't defined for the type 'EventModel' - lib\presentation\views\events\event_detail_screen.dart:266:27 - undefined_getter
-  error - The getter 'selectedEvent' isn't defined for the type 'EventsViewModel' - lib\presentation\views\events\event_detail_screen.dart:292:33 - undefined_getter
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\events\event_detail_screen.dart:306:37 - deprecated_member_use
-  error - The method 'unregisterFromEvent' isn't defined for the type 'EventsViewModel' - lib\presentation\views\events\event_detail_screen.dart:322:43 - undefined_method
-  error - The method 'registerForEvent' isn't defined for the type 'EventsViewModel' - lib\presentation\views\events\event_detail_screen.dart:324:43 - undefined_method
-  error - The getter 'currentUser' isn't defined for the type 'ProfileViewModel' - lib\presentation\views\profile\edit_profile_screen.dart:49:28 - undefined_getter
-  error - The method 'updateProfile' isn't defined for the type 'ProfileViewModel' - lib\presentation\views\profile\edit_profile_screen.dart:440:10 - undefined_method
-  error - The method 'deleteAccount' isn't defined for the type 'ProfileViewModel' - lib\presentation\views\profile\edit_profile_screen.dart:616:52 - undefined_method
    info - Don't invoke 'print' in production code - lib\presentation\views\profile\profile_screen.dart:47:9 - avoid_print
    info - Don't invoke 'print' in production code - lib\presentation\views\profile\profile_screen.dart:82:9 - avoid_print
    info - Don't invoke 'print' in production code - lib\presentation\views\profile\profile_screen.dart:96:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\presentation\views\profile\profile_screen.dart:152:9 - avoid_print
    info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\views\profile\profile_screen.dart:257:33 - use_build_context_synchronously
-  error - Arguments of a constant creation must be constant expressions - lib\presentation\views\routes\create_route_screen.dart:269:30 - const_with_non_constant_argument
-  error - The getter 'road' isn't defined for the type 'Icons' - lib\presentation\views\routes\create_route_screen.dart:269:36 - undefined_getter
-  error - The method 'createRoute' isn't defined for the type 'SavedRoutesViewModel' - lib\presentation\views\routes\create_route_screen.dart:556:44 - undefined_method
    info - Don't invoke 'print' in production code - lib\presentation\views\routes\map_picker_screen.dart:51:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\presentation\views\routes\map_picker_screen.dart:89:9 - avoid_print
    info - Don't invoke 'print' in production code - lib\presentation\views\routes\map_picker_screen.dart:97:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\presentation\views\routes\map_picker_screen.dart:181:9 - avoid_print
-  error - The method 'loadRouteDetail' isn't defined for the type 'SavedRoutesViewModel' - lib\presentation\views\routes\route_detail_screen.dart:20:44 - undefined_method
-  error - The getter 'selectedRoute' isn't defined for the type 'SavedRoutesViewModel' - lib\presentation\views\routes\route_detail_screen.dart:33:35 - undefined_getter
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\routes\route_detail_screen.dart:96:48 - deprecated_member_use
-  error - The method 'toStringAsFixed' can't be unconditionally invoked because the receiver can be 'null' - lib\presentation\views\routes\route_detail_screen.dart:118:33 - unchecked_use_of_nullable_value
-  error - The getter 'estimatedDuration' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:123:37 - undefined_getter
-  error - The getter 'startPoint' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:190:62 - undefined_getter
-  error - The getter 'endPoint' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:192:56 - undefined_getter
-  error - The getter 'roadType' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:193:23 - undefined_getter
-  error - The getter 'road' isn't defined for the type 'Icons' - lib\presentation\views\routes\route_detail_screen.dart:195:35 - undefined_getter
-  error - The getter 'roadType' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:195:62 - undefined_getter
-  error - The getter 'scenicValue' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:197:23 - undefined_getter
-  error - The getter 'scenicValue' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:202:41 - undefined_getter
-  error - The getter 'waypoints' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:287:15 - undefined_getter
-  error - The getter 'waypoints' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:287:42 - undefined_getter
-  error - The getter 'waypoints' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:304:28 - undefined_getter
-  error - The getter 'waypoints' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:307:36 - undefined_getter
-  error - The getter 'creatorName' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:341:19 - undefined_getter
-  error - The getter 'creatorName' isn't defined for the type 'RouteModel' - lib\presentation\views\routes\route_detail_screen.dart:346:17 - undefined_getter
-  error - The getter 'selectedRoute' isn't defined for the type 'SavedRoutesViewModel' - lib\presentation\views\routes\route_detail_screen.dart:363:33 - undefined_getter
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\routes\route_detail_screen.dart:374:37 - deprecated_member_use
-  error - The method 'unsaveRoute' isn't defined for the type 'SavedRoutesViewModel' - lib\presentation\views\routes\route_detail_screen.dart:386:33 - undefined_method
-  error - The method 'saveRoute' isn't defined for the type 'SavedRoutesViewModel' - lib\presentation\views\routes\route_detail_screen.dart:388:33 - undefined_method
    info - Don't invoke 'print' in production code - lib\presentation\views\routes\rutas_screen.dart:116:7 - avoid_print
    info - Don't use 'BuildContext's across async gaps - lib\presentation\views\routes\rutas_screen.dart:343:30 - use_build_context_synchronously
    info - Don't use 'BuildContext's across async gaps - lib\presentation\views\routes\rutas_screen.dart:348:11 - use_build_context_synchronously
@@ -285,26 +55,7 @@ warning - The left operand can't be null, so the right operand is never executed
    info - Don't invoke 'print' in production code - lib\presentation\views\routes\saved_routes_screen.dart:93:9 - avoid_print
    info - Don't use 'BuildContext's across async gaps - lib\presentation\views\routes\saved_routes_screen.dart:94:30 - use_build_context_synchronously
    info - Don't invoke 'print' in production code - lib\presentation\views\routes\saved_routes_screen.dart:176:7 - avoid_print
-  error - The method 'loadTallerDetail' isn't defined for the type 'TalleresViewModel' - lib\presentation\views\talleres\taller_detail_screen.dart:20:41 - undefined_method
-  error - The getter 'selectedTaller' isn't defined for the type 'TalleresViewModel' - lib\presentation\views\talleres\taller_detail_screen.dart:33:36 - undefined_getter
-  error - The getter 'name' isn't defined for the type 'TallerModel' - lib\presentation\views\talleres\taller_detail_screen.dart:79:18 - undefined_getter
-  error - The getter 'imageUrl' isn't defined for the type 'TallerModel' - lib\presentation\views\talleres\taller_detail_screen.dart:92:20 - undefined_getter
-  error - The getter 'imageUrl' isn't defined for the type 'TallerModel' - lib\presentation\views\talleres\taller_detail_screen.dart:94:26 - undefined_getter
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\talleres\taller_detail_screen.dart:113:44 - deprecated_member_use
-  error - The getter 'name' isn't defined for the type 'String' - lib\presentation\views\talleres\taller_detail_screen.dart:259:27 - undefined_getter
-  error - The getter 'description' isn't defined for the type 'String' - lib\presentation\views\talleres\taller_detail_screen.dart:263:29 - undefined_getter
-  error - The getter 'description' isn't defined for the type 'String' - lib\presentation\views\talleres\taller_detail_screen.dart:264:40 - undefined_getter
-  error - The getter 'price' isn't defined for the type 'String' - lib\presentation\views\talleres\taller_detail_screen.dart:267:29 - undefined_getter
-  error - The getter 'price' isn't defined for the type 'String' - lib\presentation\views\talleres\taller_detail_screen.dart:269:40 - undefined_getter
-  error - The argument type 'String' can't be assigned to the parameter type 'int'.  - lib\presentation\views\talleres\taller_detail_screen.dart:364:36 - argument_type_not_assignable
-  error - The argument type 'String' can't be assigned to the parameter type 'int'.  - lib\presentation\views\talleres\taller_detail_screen.dart:366:38 - argument_type_not_assignable
-warning - The operand can't be 'null', so the condition is always 'true' - lib\presentation\views\talleres\taller_detail_screen.dart:366:50 - unnecessary_null_comparison
-  error - The argument type 'String' can't be assigned to the parameter type 'int'.  - lib\presentation\views\talleres\taller_detail_screen.dart:368:64 - argument_type_not_assignable
-  error - The argument type 'String' can't be assigned to the parameter type 'int'.  - lib\presentation\views\talleres\taller_detail_screen.dart:370:38 - argument_type_not_assignable
-warning - The operand can't be 'null', so the condition is always 'true' - lib\presentation\views\talleres\taller_detail_screen.dart:370:48 - unnecessary_null_comparison
-  error - The argument type 'String' can't be assigned to the parameter type 'int'.  - lib\presentation\views\talleres\taller_detail_screen.dart:372:65 - argument_type_not_assignable
-  error - The getter 'selectedTaller' isn't defined for the type 'TalleresViewModel' - lib\presentation\views\talleres\taller_detail_screen.dart:515:34 - undefined_getter
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\talleres\taller_detail_screen.dart:524:37 - deprecated_member_use
-  error - The getter 'selectedTaller' isn't defined for the type 'TalleresViewModel' - lib\presentation\views\talleres\taller_detail_screen.dart:618:57 - undefined_getter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\login_screen.dart:258:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\login_screen.dart:275:49 - deprecated_member_use
 
-245 issues found. (ran in 3.3s)
+57 issues found. (ran in 33.3s)
