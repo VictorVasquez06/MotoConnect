@@ -199,7 +199,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         ),
         const SizedBox(height: 12),
         Text(
-          event.description ?? 'Sin descripción disponible',
+          event.description.isEmpty ? 'Sin descripción disponible' : event.description,
           style: const TextStyle(fontSize: 16, height: 1.5),
         ),
       ],
@@ -237,7 +237,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              event.location ?? 'Ubicación por confirmar',
+              event.location.isEmpty ? 'Ubicación por confirmar' : event.location,
               style: const TextStyle(fontSize: 16),
             ),
           ],

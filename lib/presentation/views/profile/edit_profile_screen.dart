@@ -49,15 +49,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final user = viewModel.currentUser;
 
     if (user != null) {
-      _nameController.text = user.name ?? '';
-      _emailController.text = user.email ?? '';
-      _phoneController.text = user.phone ?? '';
-      _bioController.text = user.bio ?? '';
-      _locationController.text = user.location ?? '';
-      _selectedMotorcycleBrand = user.motorcycleBrand;
-      _selectedMotorcycleModel = user.motorcycleModel;
-      _motorcycleYear = user.motorcycleYear;
-      _profileImageUrl = user.avatarUrl;
+      _nameController.text = viewModel.nombreController.text;
+      _emailController.text = viewModel.correoController.text;
+      _selectedMotorcycleModel = viewModel.modeloMotoController.text;
+
+      // Campos adicionales por ahora vacíos (para futuras implementaciones)
+      _phoneController.text = '';
+      _bioController.text = '';
+      _locationController.text = '';
     }
   }
 
@@ -423,46 +422,54 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _isLoading = true;
     });
 
-    final profileData = {
-      'name': _nameController.text.trim(),
-      'email': _emailController.text.trim(),
-      'phone': _phoneController.text.trim(),
-      'location': _locationController.text.trim(),
-      'bio': _bioController.text.trim(),
-      'motorcycle_brand': _selectedMotorcycleBrand,
-      'motorcycle_model': _selectedMotorcycleModel,
-      'motorcycle_year': _motorcycleYear,
-      'avatar_url': _profileImageUrl,
-    };
-
     context
         .read<ProfileViewModel>()
-        .updateProfile(profileData)
-        .then((_) {
+        .updateProfile(
+          nombre: _nameController.text.trim(),
+          modeloMoto: _selectedMotorcycleModel?.trim(),
+        )
+        .then((success) {
           setState(() {
             _isLoading = false;
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Perfil actualizado exitosamente'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          if (success) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Perfil actualizado exitosamente'),
+                  backgroundColor: Colors.green,
+                ),
+              );
 
-          Navigator.pop(context);
+              Navigator.pop(context);
+            }
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Error al actualizar perfil: ${context.read<ProfileViewModel>().errorMessage ?? "Error desconocido"}',
+                  ),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
         })
         .catchError((error) {
           setState(() {
             _isLoading = false;
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error al actualizar perfil: $error'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error al actualizar perfil: $error'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
         });
   }
 

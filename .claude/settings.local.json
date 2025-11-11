@@ -4,7 +4,8 @@
       "Bash(flutter analyze:*)",
       "Bash(flutter pub get:*)",
       "Bash(Out-File -FilePath \"analyze_output.txt\" -Encoding UTF8)",
-      "Bash(analyze_output.txt)"
+      "Bash(analyze_output.txt)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

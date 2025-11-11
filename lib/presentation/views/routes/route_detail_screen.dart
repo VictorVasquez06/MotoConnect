@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../data/models/route_model.dart';
 import '../../viewmodels/routes/saved_routes_viewmodel.dart';
 
 class RouteDetailScreen extends StatefulWidget {
@@ -30,31 +29,31 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final route = viewModel.selectedRoute;
-          if (route == null) {
+          final routeData = viewModel.selectedRoute;
+          if (routeData == null) {
             return const Center(child: Text('Ruta no encontrada'));
           }
 
           return CustomScrollView(
             slivers: [
-              _buildAppBar(route),
+              _buildAppBar(routeData),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildRouteStats(route),
+                      _buildRouteStats(routeData),
                       const SizedBox(height: 24),
-                      _buildDescription(route),
+                      _buildDescription(routeData),
                       const SizedBox(height: 24),
-                      _buildRouteInfo(route),
+                      _buildRouteInfo(routeData),
                       const SizedBox(height: 24),
-                      _buildMapPreview(route),
+                      _buildMapPreview(routeData),
                       const SizedBox(height: 24),
-                      _buildWaypoints(route),
+                      _buildWaypoints(routeData),
                       const SizedBox(height: 24),
-                      _buildCreatorInfo(route),
+                      _buildCreatorInfo(routeData),
                       const SizedBox(height: 100),
                     ],
                   ),
@@ -68,13 +67,15 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
     );
   }
 
-  Widget _buildAppBar(RouteModel route) {
+  Widget _buildAppBar(Map<String, dynamic> routeData) {
+    final name = routeData['nombre_ruta'] as String? ?? 'Ruta sin nombre';
+
     return SliverAppBar(
       expandedHeight: 200,
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
-          route.name,
+          name,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             shadows: [
@@ -105,7 +106,11 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
     );
   }
 
-  Widget _buildRouteStats(RouteModel route) {
+  Widget _buildRouteStats(Map<String, dynamic> routeData) {
+    final distance = routeData['distancia_km'] as num? ?? 0;
+    final duration = routeData['duracion_minutos'] as int? ?? 0;
+    final difficulty = routeData['dificultad'] as String? ?? 'Media';
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -115,17 +120,17 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
           children: [
             _buildStatItem(
               Icons.straighten,
-              '${route.distance.toStringAsFixed(1)} km',
+              '${distance.toStringAsFixed(1)} km',
               'Distancia',
             ),
             _buildStatItem(
               Icons.timer,
-              _formatDuration(route.estimatedDuration),
+              _formatDuration(duration),
               'Duración',
             ),
             _buildStatItem(
               Icons.terrain,
-              route.difficulty ?? 'Media',
+              difficulty,
               'Dificultad',
             ),
           ],
@@ -149,8 +154,10 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
     );
   }
 
-  Widget _buildDescription(RouteModel route) {
-    if (route.description == null || route.description!.isEmpty) {
+  Widget _buildDescription(Map<String, dynamic> routeData) {
+    final description = routeData['descripcion_ruta'] as String?;
+
+    if (description == null || description.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -165,14 +172,19 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
         ),
         const SizedBox(height: 12),
         Text(
-          route.description!,
+          description,
           style: const TextStyle(fontSize: 16, height: 1.5),
         ),
       ],
     );
   }
 
-  Widget _buildRouteInfo(RouteModel route) {
+  Widget _buildRouteInfo(Map<String, dynamic> routeData) {
+    final startPoint = routeData['punto_inicio'] as String? ?? 'No especificado';
+    final endPoint = routeData['punto_fin'] as String? ?? 'No especificado';
+    final roadType = routeData['tipo_via'] as String?;
+    final scenicValue = routeData['valor_paisajistico'] as int?;
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -187,19 +199,19 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow(Icons.location_on, 'Inicio', route.startPoint ?? 'No especificado'),
+            _buildInfoRow(Icons.location_on, 'Inicio', startPoint),
             const Divider(height: 24),
-            _buildInfoRow(Icons.flag, 'Destino', route.endPoint ?? 'No especificado'),
-            if (route.roadType != null) ...[
+            _buildInfoRow(Icons.flag, 'Destino', endPoint),
+            if (roadType != null) ...[
               const Divider(height: 24),
-              _buildInfoRow(Icons.route, 'Tipo de vía', route.roadType!),
+              _buildInfoRow(Icons.route, 'Tipo de vía', roadType),
             ],
-            if (route.scenicValue != null) ...[
+            if (scenicValue != null) ...[
               const Divider(height: 24),
               _buildInfoRow(
                 Icons.landscape,
                 'Valor paisajístico',
-                _getSceneryRating(route.scenicValue!),
+                _getSceneryRating(scenicValue),
               ),
             ],
           ],
@@ -236,7 +248,7 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
     );
   }
 
-  Widget _buildMapPreview(RouteModel route) {
+  Widget _buildMapPreview(Map<String, dynamic> routeData) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -283,8 +295,10 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
     );
   }
 
-  Widget _buildWaypoints(RouteModel route) {
-    if (route.waypoints == null || route.waypoints!.isEmpty) {
+  Widget _buildWaypoints(Map<String, dynamic> routeData) {
+    final waypoints = routeData['puntos_interes'] as List?;
+
+    if (waypoints == null || waypoints.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -301,10 +315,13 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: route.waypoints!.length,
+          itemCount: waypoints.length,
           separatorBuilder: (context, index) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
-            final waypoint = route.waypoints![index];
+            final waypoint = waypoints[index] as Map<String, dynamic>;
+            final name = waypoint['nombre'] as String? ?? 'Punto ${index + 1}';
+            final description = waypoint['descripcion'] as String?;
+
             return Card(
               child: ListTile(
                 leading: CircleAvatar(
@@ -315,13 +332,11 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                   ),
                 ),
                 title: Text(
-                  waypoint.name ?? 'Punto ${index + 1}',
+                  name,
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 subtitle:
-                    waypoint.description != null
-                        ? Text(waypoint.description!)
-                        : null,
+                    description != null ? Text(description) : null,
                 trailing: const Icon(Icons.location_on),
               ),
             );
@@ -331,22 +346,30 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
     );
   }
 
-  Widget _buildCreatorInfo(RouteModel route) {
+  Widget _buildCreatorInfo(Map<String, dynamic> routeData) {
+    final creatorName = routeData['creador_nombre'] as String? ?? 'Usuario';
+    final createdAtStr = routeData['fecha'] as String?;
+    final createdAt = createdAtStr != null ? DateTime.tryParse(createdAtStr) : null;
+
     return Card(
       elevation: 2,
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: Theme.of(context).primaryColor,
           child: Text(
-            route.creatorName?[0].toUpperCase() ?? 'U',
+            creatorName.isNotEmpty ? creatorName[0].toUpperCase() : 'U',
             style: const TextStyle(color: Colors.white),
           ),
         ),
         title: Text(
-          route.creatorName ?? 'Usuario',
+          creatorName,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
-        subtitle: Text('Creada el ${_formatDate(route.createdAt)}'),
+        subtitle: Text(
+          createdAt != null
+              ? 'Creada el ${_formatDate(createdAt)}'
+              : 'Fecha desconocida',
+        ),
         trailing: IconButton(
           onPressed: () {
             // TODO: Ver perfil del creador
@@ -360,10 +383,11 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
   Widget _buildBottomActions() {
     return Consumer<SavedRoutesViewModel>(
       builder: (context, viewModel, child) {
-        final route = viewModel.selectedRoute;
-        if (route == null) return const SizedBox.shrink();
+        final routeData = viewModel.selectedRoute;
+        if (routeData == null) return const SizedBox.shrink();
 
-        final isSaved = route.isSaved ?? false;
+        final isSaved = routeData['guardada'] as bool? ?? false;
+        final routeId = routeData['id'] as String;
 
         return Container(
           padding: const EdgeInsets.all(16.0),
@@ -383,9 +407,9 @@ class _RouteDetailScreenState extends State<RouteDetailScreen> {
                 IconButton(
                   onPressed: () {
                     if (isSaved) {
-                      viewModel.unsaveRoute(route.id);
+                      viewModel.unsaveRoute(routeId);
                     } else {
-                      viewModel.saveRoute(route.id);
+                      viewModel.saveRoute(routeId);
                     }
                   },
                   icon: Icon(isSaved ? Icons.bookmark : Icons.bookmark_border),
