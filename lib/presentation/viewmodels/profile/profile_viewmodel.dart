@@ -101,21 +101,62 @@ class ProfileViewModel extends ChangeNotifier {
               .from('usuarios')
               .select('nombre, modelo_moto')
               .eq('id', _userId!)
-              .single();
+              .maybeSingle();
 
-      nombreController.text = respuesta['nombre'] ?? '';
-      modeloMotoController.text = respuesta['modelo_moto'] ?? '';
+      // Si el perfil no existe, crearlo
+      if (respuesta == null) {
+        debugPrint(
+          'Perfil no encontrado, creando uno nuevo para el usuario $_userId',
+        );
+        await _crearPerfilInicial(supabaseUser);
+      } else {
+        nombreController.text = respuesta['nombre'] ?? '';
+        modeloMotoController.text = respuesta['modelo_moto'] ?? '';
+      }
 
       _status = ProfileStatus.loaded;
       _hasUnsavedChanges = false;
       _errorMessage = null;
     } catch (e) {
-      _errorMessage = 'Error al cargar datos del perfil: ${e.toString()}';
+      _errorMessage = 'No se pudieron cargar los datos del perfil: ${e.toString()}';
       _status = ProfileStatus.error;
       debugPrint('Error en cargarDatosUsuario: $e');
     }
 
     notifyListeners();
+  }
+
+  /// Crea un perfil inicial para el usuario
+  Future<void> _crearPerfilInicial(User supabaseUser) async {
+    try {
+      // Extraer nombre de los metadatos o del email
+      final nombre = supabaseUser.userMetadata?['nombre'] as String? ??
+          supabaseUser.userMetadata?['full_name'] as String? ??
+          supabaseUser.userMetadata?['name'] as String? ??
+          supabaseUser.email?.split('@')[0] ??
+          'Usuario';
+
+      // Crear el perfil en la base de datos
+      await _supabase.from('usuarios').insert({
+        'id': supabaseUser.id,
+        'correo': supabaseUser.email ?? '',
+        'nombre': nombre,
+        'modelo_moto': null,
+      });
+
+      // Actualizar los controladores
+      nombreController.text = nombre;
+      modeloMotoController.text = '';
+
+      debugPrint('Perfil inicial creado exitosamente');
+    } catch (e) {
+      debugPrint('Error al crear perfil inicial: $e');
+      // Si falla la creación, usar valores por defecto
+      nombreController.text =
+          supabaseUser.userMetadata?['nombre'] as String? ?? 'Usuario';
+      modeloMotoController.text = '';
+      rethrow;
+    }
   }
 
   /// Guarda los cambios del perfil

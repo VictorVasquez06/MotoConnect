@@ -95,6 +95,21 @@ class AuthApiService {
         throw AuthException('Error al crear usuario');
       }
 
+      // Crear el perfil del usuario en la tabla usuarios
+      // Esto es un backup por si el trigger de Supabase falla
+      try {
+        await _supabase.from('usuarios').upsert({
+          'id': response.user!.id,
+          'correo': email,
+          'nombre': nombre,
+          'modelo_moto': null,
+        });
+      } catch (e) {
+        // Si falla, el trigger debería haberlo creado
+        // Log del error pero no fallar el registro
+        print('Advertencia: No se pudo crear perfil inicial: $e');
+      }
+
       return UserModel(
         id: response.user!.id,
         email: response.user!.email ?? '',
@@ -169,13 +184,30 @@ class AuthApiService {
 
       // 4. Crear el modelo de usuario
       final user = response.user!;
+      final nombre = user.userMetadata?['full_name'] as String? ??
+          user.userMetadata?['name'] as String? ??
+          googleUser.displayName ??
+          '';
+
+      // Crear el perfil del usuario en la tabla usuarios si es un nuevo usuario
+      // Esto es un backup por si el trigger de Supabase falla
+      try {
+        await _supabase.from('usuarios').upsert({
+          'id': user.id,
+          'correo': user.email ?? '',
+          'nombre': nombre,
+          'modelo_moto': null,
+        });
+      } catch (e) {
+        // Si falla, el trigger debería haberlo creado o el usuario ya existe
+        // Log del error pero no fallar el login
+        print('Advertencia: No se pudo crear/actualizar perfil: $e');
+      }
+
       return UserModel(
         id: user.id,
         email: user.email ?? '',
-        nombre: user.userMetadata?['full_name'] as String? ??
-            user.userMetadata?['name'] as String? ??
-            googleUser.displayName ??
-            '',
+        nombre: nombre,
       );
     } on AuthException {
       rethrow;

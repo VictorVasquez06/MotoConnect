@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import '../../../services/storage_service.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -15,7 +18,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
   final TextEditingController _modeloMotoController = TextEditingController();
 
   bool _cargando = true;
+  bool _subiendoImagen = false;
   String? _userId; // Para guardar el UID del usuario actual
+  String? _avatarUrl; // URL de la foto de perfil
+  final StorageService _storageService = StorageService();
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void initState() {
@@ -67,7 +74,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         final respuesta =
             await Supabase.instance.client
                 .from('usuarios')
-                .select('nombre, modelo_moto')
+                .select('nombre, modelo_moto, foto_perfil_url')
                 .eq(
                   'id',
                   _userId!,
@@ -77,6 +84,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         if (mounted) {
           _nombreController.text = respuesta['nombre'] ?? 'Completa tu nombre';
           _modeloMotoController.text = respuesta['modelo_moto'] ?? '';
+          _avatarUrl = respuesta['foto_perfil_url'] as String?;
         }
       } catch (e) {
         print("Error al cargar datos de 'usuarios' en Supabase: $e");
@@ -165,6 +173,205 @@ class _PerfilScreenState extends State<PerfilScreen> {
     }
   }
 
+  /// Muestra las opciones para cambiar la foto de perfil
+  void _mostrarOpcionesFoto() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Tomar foto'),
+              onTap: () {
+                Navigator.pop(context);
+                _tomarFoto();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Seleccionar de galería'),
+              onTap: () {
+                Navigator.pop(context);
+                _seleccionarDeGaleria();
+              },
+            ),
+            if (_avatarUrl != null)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text(
+                  'Eliminar foto',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _eliminarFoto();
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Toma una foto con la cámara
+  Future<void> _tomarFoto() async {
+    try {
+      final XFile? photo = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 70,
+      );
+
+      if (photo != null) {
+        await _subirImagen(File(photo.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al tomar foto: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  /// Selecciona una imagen de la galería
+  Future<void> _seleccionarDeGaleria() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 70,
+      );
+
+      if (image != null) {
+        await _subirImagen(File(image.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al seleccionar imagen: ${e.toString()}'),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Sube la imagen al bucket de Supabase
+  Future<void> _subirImagen(File imageFile) async {
+    if (_userId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: Usuario no identificado')),
+        );
+      }
+      return;
+    }
+
+    setState(() => _subiendoImagen = true);
+
+    try {
+      // Subir imagen a Supabase Storage
+      final imageUrl = await _storageService.uploadAvatar(
+        imageFile: imageFile,
+        userId: _userId!,
+      );
+
+      // Actualizar la URL en la base de datos
+      await Supabase.instance.client.from('usuarios').update({
+        'foto_perfil_url': imageUrl,
+      }).eq('id', _userId!);
+
+      if (mounted) {
+        setState(() {
+          _avatarUrl = imageUrl;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Foto de perfil actualizada')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al subir imagen: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _subiendoImagen = false);
+      }
+    }
+  }
+
+  /// Elimina la foto de perfil
+  Future<void> _eliminarFoto() async {
+    if (_userId == null) return;
+
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar foto de perfil'),
+        content: const Text('¿Estás seguro de que deseas eliminar tu foto de perfil?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar != true) return;
+
+    setState(() => _subiendoImagen = true);
+
+    try {
+      // Eliminar imagen del storage
+      await _storageService.deleteAvatar(userId: _userId!);
+
+      // Actualizar la base de datos
+      await Supabase.instance.client.from('usuarios').update({
+        'foto_perfil_url': null,
+      }).eq('id', _userId!);
+
+      if (mounted) {
+        setState(() {
+          _avatarUrl = null;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Foto de perfil eliminada')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al eliminar foto: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _subiendoImagen = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,14 +386,56 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   child: ListView(
                     children: <Widget>[
                       Center(
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Colors.grey[300],
-                          child: Icon(
-                            Icons.person,
-                            size: 50,
-                            color: Colors.grey[600],
-                          ),
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: 60,
+                              backgroundColor: Colors.grey[300],
+                              backgroundImage:
+                                  _avatarUrl != null
+                                      ? NetworkImage(_avatarUrl!)
+                                      : null,
+                              child:
+                                  _avatarUrl == null
+                                      ? Icon(
+                                        Icons.person,
+                                        size: 60,
+                                        color: Colors.grey[600],
+                                      )
+                                      : null,
+                            ),
+                            if (_subiendoImagen)
+                              Positioned.fill(
+                                child: CircleAvatar(
+                                  radius: 60,
+                                  backgroundColor: Colors.black54,
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).primaryColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.camera_alt,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  onPressed:
+                                      _subiendoImagen
+                                          ? null
+                                          : _mostrarOpcionesFoto,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 24),

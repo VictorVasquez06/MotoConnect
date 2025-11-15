@@ -230,14 +230,15 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Comunidad Biker")),
-      body: Column(
-        children: [
-          Expanded(
-            child:
-                _cargando
-                    ? const Center(child: CircularProgressIndicator())
-                    : _publicacionesConAutor.isEmpty
-                    ? Center(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child:
+                  _cargando
+                      ? const Center(child: CircularProgressIndicator())
+                      : _publicacionesConAutor.isEmpty
+                      ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -654,6 +655,7 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
