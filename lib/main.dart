@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // 👈 IMPORTANTE: Importar provider
+import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'core/config/supabase_config.dart'; // 👈 IMPORTANTE: Importar SupabaseConfig
+import 'core/config/supabase_config.dart';
 
 // SCREENS - Archivos en lib/presentation/views/
 import 'presentation/views/auth/splash_screen.dart';
-import 'screens/login_screen.dart'; // Mantener el original
+import 'screens/login_screen.dart';
 import 'presentation/views/auth/register_screen.dart';
 import 'presentation/views/home/home_screen.dart';
 import 'presentation/views/profile/profile_screen.dart';
@@ -18,6 +18,7 @@ import 'presentation/views/routes/saved_routes_screen.dart';
 import 'presentation/views/talleres/talleres_screen.dart';
 import 'presentation/views/community/community_screen.dart';
 import 'presentation/views/routes/map_picker_screen.dart';
+import 'presentation/views/grupos/grupos_screen.dart';
 
 // VIEWMODELS - 👈 IMPORTANTE: Importar ViewModels
 import 'presentation/viewmodels/auth/splash_viewmodel.dart';
@@ -164,6 +165,7 @@ class MotoConnectApp extends StatelessWidget {
         '/rutas-recomendadas': (context) => const RutasRecomendadasScreen(),
         '/talleres': (context) => const TalleresScreen(),
         '/comunidad': (context) => const ComunidadScreen(),
+        '/grupos': (context) => const GruposScreen(),
         '/map-picker': (context) {
           final args =
               ModalRoute.of(context)?.settings.arguments

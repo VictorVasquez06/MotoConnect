@@ -3,10 +3,6 @@ import 'package:flutter/material.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  void _logout(BuildContext context) {
-    Navigator.pushReplacementNamed(context, '/login');
-  }
-
   void _navigate(BuildContext context, String route) {
     Navigator.pushNamed(context, route);
   }
@@ -24,11 +20,6 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        leading: IconButton(
-          icon: const Icon(Icons.logout, color: Colors.white),
-          tooltip: 'Cerrar sesión',
-          onPressed: () => _logout(context),
-        ),
         title: const Text(
           'MotoConnect',
           style: TextStyle(
@@ -90,6 +81,13 @@ class HomeScreen extends StatelessWidget {
                     'assets/images/icon_comunidad.png',
                     route: '/comunidad',
                   ),
+                  _buildProfileTile(
+                    context,
+                    'Grupos',
+                    'assets/images/icon_grupos.png',
+                    route: '/grupos',
+                    icon: Icons.groups,
+                  ),
                 ],
               ),
             ),
@@ -112,6 +110,7 @@ class HomeScreen extends StatelessWidget {
     String title,
     String imagePath, {
     required String route,
+    IconData? icon,
   }) {
     return GestureDetector(
       onTap: () => _navigate(context, route),
@@ -124,7 +123,15 @@ class HomeScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(12),
-              child: Center(child: Image.asset(imagePath, fit: BoxFit.contain)),
+              child: Center(
+                child: icon != null
+                    ? Icon(
+                        icon,
+                        size: 64,
+                        color: Colors.orangeAccent,
+                      )
+                    : Image.asset(imagePath, fit: BoxFit.contain),
+              ),
             ),
           ),
           const SizedBox(height: 8),

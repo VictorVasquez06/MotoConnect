@@ -13,6 +13,7 @@ library;
 
 import '../services/api/event_api_service.dart';
 import '../models/event_model.dart';
+import '../models/event_participant_model.dart';
 
 class EventRepository {
   // ========================================
@@ -84,8 +85,16 @@ class EventRepository {
   /// [title] - Título del evento
   /// [description] - Descripción
   /// [date] - Fecha y hora
-  /// [location] - Ubicación
+  /// [puntoEncuentro] - Ubicación del punto de encuentro
   /// [createdBy] - ID del usuario creador
+  /// [destino] - Ubicación del destino (opcional)
+  /// [puntoEncuentroLat] - Latitud del punto de encuentro (opcional)
+  /// [puntoEncuentroLng] - Longitud del punto de encuentro (opcional)
+  /// [destinoLat] - Latitud del destino (opcional)
+  /// [destinoLng] - Longitud del destino (opcional)
+  /// [fotoUrl] - URL de la foto del evento (opcional)
+  /// [grupoId] - ID del grupo asociado (opcional)
+  /// [isPublic] - Si es público (true) o privado (false)
   ///
   /// Retorna:
   /// - Evento creado
@@ -93,16 +102,32 @@ class EventRepository {
     required String title,
     required String description,
     required DateTime date,
-    required String location,
+    required String puntoEncuentro,
     required String createdBy,
+    String? destino,
+    double? puntoEncuentroLat,
+    double? puntoEncuentroLng,
+    double? destinoLat,
+    double? destinoLng,
+    String? fotoUrl,
+    String? grupoId,
+    bool isPublic = true,
   }) async {
     try {
       return await _apiService.createEvent(
         title: title,
         description: description,
         date: date,
-        location: location,
+        puntoEncuentro: puntoEncuentro,
         createdBy: createdBy,
+        destino: destino,
+        puntoEncuentroLat: puntoEncuentroLat,
+        puntoEncuentroLng: puntoEncuentroLng,
+        destinoLat: destinoLat,
+        destinoLng: destinoLng,
+        fotoUrl: fotoUrl,
+        grupoId: grupoId,
+        isPublic: isPublic,
       );
     } catch (e) {
       throw Exception('Error al crear evento: ${e.toString()}');
@@ -115,13 +140,29 @@ class EventRepository {
   /// [title] - Nuevo título (opcional)
   /// [description] - Nueva descripción (opcional)
   /// [date] - Nueva fecha (opcional)
-  /// [location] - Nueva ubicación (opcional)
+  /// [puntoEncuentro] - Nuevo punto de encuentro (opcional)
+  /// [destino] - Nuevo destino (opcional)
+  /// [puntoEncuentroLat] - Nueva latitud del punto de encuentro (opcional)
+  /// [puntoEncuentroLng] - Nueva longitud del punto de encuentro (opcional)
+  /// [destinoLat] - Nueva latitud del destino (opcional)
+  /// [destinoLng] - Nueva longitud del destino (opcional)
+  /// [fotoUrl] - Nueva URL de foto (opcional)
+  /// [grupoId] - Nuevo ID de grupo (opcional)
+  /// [isPublic] - Nueva configuración de privacidad (opcional)
   Future<void> updateEvent({
     required String eventId,
     String? title,
     String? description,
     DateTime? date,
-    String? location,
+    String? puntoEncuentro,
+    String? destino,
+    double? puntoEncuentroLat,
+    double? puntoEncuentroLng,
+    double? destinoLat,
+    double? destinoLng,
+    String? fotoUrl,
+    String? grupoId,
+    bool? isPublic,
   }) async {
     try {
       await _apiService.updateEvent(
@@ -129,7 +170,15 @@ class EventRepository {
         title: title,
         description: description,
         date: date,
-        location: location,
+        puntoEncuentro: puntoEncuentro,
+        destino: destino,
+        puntoEncuentroLat: puntoEncuentroLat,
+        puntoEncuentroLng: puntoEncuentroLng,
+        destinoLat: destinoLat,
+        destinoLng: destinoLng,
+        fotoUrl: fotoUrl,
+        grupoId: grupoId,
+        isPublic: isPublic,
       );
     } catch (e) {
       throw Exception('Error al actualizar evento: ${e.toString()}');
@@ -147,15 +196,37 @@ class EventRepository {
     }
   }
 
-  /// Registra un usuario a un evento
+  /// Registra un usuario a un evento con estado de asistencia
   ///
   /// [eventId] - ID del evento
   /// [userId] - ID del usuario
-  Future<void> joinEvent(String eventId, String userId) async {
+  /// [estado] - Estado de asistencia (por defecto: confirmado)
+  Future<void> joinEvent(
+    String eventId,
+    String userId, {
+    EstadoAsistencia estado = EstadoAsistencia.confirmado,
+  }) async {
     try {
-      await _apiService.joinEvent(eventId, userId);
+      await _apiService.joinEvent(eventId, userId, estado: estado);
     } catch (e) {
       throw Exception('Error al unirse al evento: ${e.toString()}');
+    }
+  }
+
+  /// Actualiza el estado de asistencia de un usuario
+  ///
+  /// [eventId] - ID del evento
+  /// [userId] - ID del usuario
+  /// [estado] - Nuevo estado de asistencia
+  Future<void> updateAttendanceStatus(
+    String eventId,
+    String userId,
+    EstadoAsistencia estado,
+  ) async {
+    try {
+      await _apiService.updateAttendanceStatus(eventId, userId, estado);
+    } catch (e) {
+      throw Exception('Error al actualizar estado de asistencia: ${e.toString()}');
     }
   }
 
@@ -267,6 +338,22 @@ class EventRepository {
       return await _apiService.getEventParticipantsCount(eventId);
     } catch (e) {
       return 0;
+    }
+  }
+
+  /// Obtiene participantes detallados de un evento
+  ///
+  /// [eventId] - ID del evento
+  ///
+  /// Retorna:
+  /// - Lista de participantes con información completa y estado
+  Future<List<EventParticipantModel>> getEventParticipantsDetailed(
+    String eventId,
+  ) async {
+    try {
+      return await _apiService.getEventParticipantsDetailed(eventId);
+    } catch (e) {
+      throw Exception('Error al obtener participantes detallados: ${e.toString()}');
     }
   }
 

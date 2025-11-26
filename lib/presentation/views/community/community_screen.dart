@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart'; // Para formatear la fecha
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import '../../../services/storage_service.dart';
+import 'package:video_player/video_player.dart';
 
 // Clase auxiliar para combinar datos de la publicación con el nombre del autor y detalles del evento/ruta
 class PublicacionConAutor {
@@ -35,6 +39,13 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
   bool _cargando = true;
   final TextEditingController _textoController = TextEditingController();
   final Map<String, String> _cacheNombres = {}; // Cache para nombres de usuario
+  final StorageService _storageService = StorageService();
+  final ImagePicker _imagePicker = ImagePicker();
+
+  // Estado para media seleccionada
+  File? _selectedMediaFile;
+  bool _isVideo = false;
+  bool _subiendoMedia = false;
 
   @override
   void initState() {
@@ -174,6 +185,187 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
     }
   }
 
+  /// Selecciona una imagen de la galería
+  Future<void> _seleccionarImagen() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _selectedMediaFile = File(image.path);
+          _isVideo = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al seleccionar imagen: ${e.toString()}'),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Selecciona un video de la galería
+  Future<void> _seleccionarVideo() async {
+    try {
+      final XFile? video = await _imagePicker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: const Duration(minutes: 2), // Máximo 2 minutos
+      );
+
+      if (video != null) {
+        setState(() {
+          _selectedMediaFile = File(video.path);
+          _isVideo = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al seleccionar video: ${e.toString()}'),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Limpia el archivo seleccionado
+  void _limpiarMediaSeleccionada() {
+    setState(() {
+      _selectedMediaFile = null;
+      _isVideo = false;
+    });
+  }
+
+  /// Elimina una publicación
+  Future<void> _eliminarPublicacion(String publicacionId, String? mediaUrl) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar publicación'),
+        content: const Text(
+          '¿Estás seguro de que deseas eliminar esta publicación? Esta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar != true) return;
+
+    try {
+      setState(() => _cargando = true);
+
+      // Eliminar el archivo de media si existe
+      if (mediaUrl != null && mediaUrl.isNotEmpty) {
+        await _storageService.deleteCommunityMedia(mediaUrl: mediaUrl);
+      }
+
+      // Eliminar la publicación de la base de datos
+      await Supabase.instance.client
+          .from('comentarios_comunidad')
+          .delete()
+          .eq('id', publicacionId);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Publicación eliminada')),
+        );
+        _obtenerPublicaciones();
+      }
+    } catch (e) {
+      print("Error al eliminar publicación: $e");
+      if (mounted) {
+        setState(() => _cargando = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al eliminar: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Edita una publicación
+  Future<void> _editarPublicacion(String publicacionId, String contenidoActual) async {
+    final controller = TextEditingController(text: contenidoActual);
+
+    final nuevoContenido = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Editar publicación'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: '¿Qué quieres compartir?',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 5,
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+
+    if (nuevoContenido == null || nuevoContenido.isEmpty) return;
+
+    try {
+      setState(() => _cargando = true);
+
+      await Supabase.instance.client
+          .from('comentarios_comunidad')
+          .update({'contenido': nuevoContenido})
+          .eq('id', publicacionId);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Publicación actualizada')),
+        );
+        _obtenerPublicaciones();
+      }
+    } catch (e) {
+      print("Error al editar publicación: $e");
+      if (mounted) {
+        setState(() => _cargando = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al editar: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      controller.dispose();
+    }
+  }
+
   Future<void> _crearPublicacionTexto() async {
     final currentUser = Supabase.instance.client.auth.currentUser;
     if (currentUser == null) {
@@ -186,26 +378,47 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
     }
 
     final String contenido = _textoController.text.trim();
-    if (contenido.isEmpty) {
+    if (contenido.isEmpty && _selectedMediaFile == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Escribe algo para publicar.")),
+          const SnackBar(
+            content: Text("Escribe algo o selecciona una imagen/video."),
+          ),
         );
       }
       return;
     }
 
     try {
-      if (mounted) setState(() => _cargando = true);
+      if (mounted) setState(() => _subiendoMedia = true);
 
+      String? mediaUrl;
+      String tipo = 'texto';
+
+      // Si hay un archivo seleccionado, subirlo primero
+      if (_selectedMediaFile != null) {
+        final postId = DateTime.now().millisecondsSinceEpoch.toString();
+        mediaUrl = await _storageService.uploadCommunityMedia(
+          mediaFile: _selectedMediaFile!,
+          userId: currentUser.id,
+          postId: postId,
+          isVideo: _isVideo,
+        );
+        tipo = _isVideo ? 'video' : 'imagen';
+      }
+
+      // Crear la publicación en la base de datos
       await Supabase.instance.client.from('comentarios_comunidad').insert({
         'usuario_id': currentUser.id,
-        'contenido': contenido,
-        'tipo': 'texto',
+        'contenido': contenido.isEmpty ? null : contenido,
+        'tipo': tipo,
         'fecha': DateTime.now().toIso8601String(),
+        'media_url': mediaUrl,
       });
 
       _textoController.clear();
+      _limpiarMediaSeleccionada();
+
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -222,7 +435,7 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
         );
       }
     } finally {
-      if (mounted) setState(() => _cargando = false);
+      if (mounted) setState(() => _subiendoMedia = false);
     }
   }
 
@@ -271,6 +484,7 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
                         itemBuilder: (context, index) {
                           final item = _publicacionesConAutor[index];
                           final publicacion = item.publicacionData;
+                          final publicacionId = publicacion['id'] as String?;
                           final nombreAutor =
                               item.nombreAutor; // Quién compartió en comunidad
                           final nombreRutaCompartida =
@@ -342,6 +556,58 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
                                           ],
                                         ),
                                       ),
+                                      // Menú de opciones (solo si es el autor)
+                                      if (publicacion['usuario_id'] ==
+                                          Supabase.instance.client.auth.currentUser?.id)
+                                        PopupMenuButton<String>(
+                                          icon: const Icon(
+                                            Icons.more_vert,
+                                            color: Colors.grey,
+                                          ),
+                                          onSelected: (value) {
+                                            if (value == 'editar') {
+                                              _editarPublicacion(
+                                                publicacionId!,
+                                                publicacion['contenido'] ?? '',
+                                              );
+                                            } else if (value == 'eliminar') {
+                                              _eliminarPublicacion(
+                                                publicacionId!,
+                                                publicacion['media_url'],
+                                              );
+                                            }
+                                          },
+                                          itemBuilder: (context) => [
+                                            const PopupMenuItem(
+                                              value: 'editar',
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.edit_outlined),
+                                                  SizedBox(width: 8),
+                                                  Text('Editar'),
+                                                ],
+                                              ),
+                                            ),
+                                            const PopupMenuItem(
+                                              value: 'eliminar',
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.delete_outline,
+                                                    color: Colors.red,
+                                                  ),
+                                                  SizedBox(width: 8),
+                                                  Text(
+                                                    'Eliminar',
+                                                    style: TextStyle(
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                     ],
                                   ),
                                   const SizedBox(height: 10),
@@ -356,6 +622,64 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
                                       ),
                                       child: Text(publicacion['contenido']),
                                     ),
+
+                                  // ---- INICIO: Mostrar IMAGEN ----
+                                  if (tipoPublicacion == 'imagen' &&
+                                      publicacion['media_url'] != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 8.0,
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          publicacion['media_url'],
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          loadingBuilder:
+                                              (context, child, loadingProgress) {
+                                            if (loadingProgress == null) {
+                                              return child;
+                                            }
+                                            return Container(
+                                              height: 200,
+                                              color: Colors.grey[300],
+                                              child: const Center(
+                                                child: CircularProgressIndicator(),
+                                              ),
+                                            );
+                                          },
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Container(
+                                              height: 200,
+                                              color: Colors.grey[300],
+                                              child: const Center(
+                                                child: Icon(
+                                                  Icons.broken_image,
+                                                  size: 50,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  // ---- FIN: Mostrar IMAGEN ----
+
+                                  // ---- INICIO: Mostrar VIDEO ----
+                                  if (tipoPublicacion == 'video' &&
+                                      publicacion['media_url'] != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 8.0,
+                                      ),
+                                      child: _VideoPlayerWidget(
+                                        videoUrl: publicacion['media_url'],
+                                      ),
+                                    ),
+                                  // ---- FIN: Mostrar VIDEO ----
 
                                   // ---- INICIO: Lógica para mostrar RUTA COMPARTIDA ----
                                   if (tipoPublicacion == 'ruta_compartida')
@@ -455,7 +779,7 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
                                               nombreOrganizadorEvento !=
                                                   "Usuario Anónimo" &&
                                               nombreOrganizadorEvento !=
-                                                  nombreAutor) // No mostrar si el que comparte es el mismo organizador
+                                                  item.nombreAutor) // No mostrar si el que comparte es el mismo organizador
                                             Padding(
                                               padding: const EdgeInsets.only(
                                                 top: 2.0,
@@ -622,39 +946,186 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
                     ),
           ),
           const Divider(height: 1),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _textoController,
-                    decoration: InputDecoration(
-                      hintText: "¿Qué quieres compartir?",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
+          // Vista previa del archivo seleccionado
+          if (_selectedMediaFile != null)
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              color: Colors.grey[200],
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 80,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.grey[300],
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 10,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child:
+                            _isVideo
+                                ? const Center(
+                                  child: Icon(
+                                    Icons.video_library,
+                                    size: 40,
+                                    color: Colors.black54,
+                                  ),
+                                )
+                                : Image.file(
+                                  _selectedMediaFile!,
+                                  fit: BoxFit.cover,
+                                ),
                       ),
                     ),
-                    onSubmitted: (value) => _crearPublicacionTexto(),
                   ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.send_outlined),
-                  style: IconButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: _limpiarMediaSeleccionada,
+                    tooltip: 'Eliminar',
                   ),
-                  onPressed: _crearPublicacionTexto,
+                ],
+              ),
+            ),
+          // Input para texto y botones
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.image_outlined),
+                      onPressed: _subiendoMedia ? null : _seleccionarImagen,
+                      tooltip: 'Seleccionar imagen',
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.videocam_outlined),
+                      onPressed: _subiendoMedia ? null : _seleccionarVideo,
+                      tooltip: 'Seleccionar video',
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _textoController,
+                        decoration: InputDecoration(
+                          hintText: "¿Qué quieres compartir?",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                            vertical: 10,
+                          ),
+                        ),
+                        onSubmitted: (value) => _crearPublicacionTexto(),
+                        enabled: !_subiendoMedia,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _subiendoMedia
+                        ? const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                        : IconButton(
+                          icon: const Icon(Icons.send_outlined),
+                          style: IconButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            foregroundColor:
+                                Theme.of(context).colorScheme.onPrimary,
+                          ),
+                          onPressed: _crearPublicacionTexto,
+                        ),
+                  ],
                 ),
               ],
             ),
           ),
         ],
+        ),
+      ),
+    );
+  }
+}
+
+// Widget para reproducir videos
+class _VideoPlayerWidget extends StatefulWidget {
+  final String videoUrl;
+
+  const _VideoPlayerWidget({required this.videoUrl});
+
+  @override
+  State<_VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
+}
+
+class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
+  late VideoPlayerController _controller;
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
+      ..initialize().then((_) {
+        if (mounted) {
+          setState(() {
+            _isInitialized = true;
+          });
+        }
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return Container(
+        height: 200,
+        color: Colors.grey[300],
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: AspectRatio(
+        aspectRatio: _controller.value.aspectRatio,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            VideoPlayer(_controller),
+            // Botón de reproducir/pausar
+            IconButton(
+              icon: Icon(
+                _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                size: 50,
+                color: Colors.white.withValues(alpha: 0.8),
+              ),
+              onPressed: () {
+                setState(() {
+                  if (_controller.value.isPlaying) {
+                    _controller.pause();
+                  } else {
+                    _controller.play();
+                  }
+                });
+              },
+            ),
+          ],
         ),
       ),
     );

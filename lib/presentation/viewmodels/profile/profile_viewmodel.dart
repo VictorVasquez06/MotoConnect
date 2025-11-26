@@ -23,6 +23,7 @@ class ProfileViewModel extends ChangeNotifier {
   final TextEditingController nombreController = TextEditingController();
   final TextEditingController correoController = TextEditingController();
   final TextEditingController modeloMotoController = TextEditingController();
+  final TextEditingController apodoController = TextEditingController();
 
   // ========================================
   // ESTADO
@@ -99,7 +100,7 @@ class ProfileViewModel extends ChangeNotifier {
       final respuesta =
           await _supabase
               .from('usuarios')
-              .select('nombre, modelo_moto')
+              .select('nombre, modelo_moto, apodo')
               .eq('id', _userId!)
               .maybeSingle();
 
@@ -112,6 +113,7 @@ class ProfileViewModel extends ChangeNotifier {
       } else {
         nombreController.text = respuesta['nombre'] ?? '';
         modeloMotoController.text = respuesta['modelo_moto'] ?? '';
+        apodoController.text = respuesta['apodo'] ?? '';
       }
 
       _status = ProfileStatus.loaded;
@@ -189,6 +191,10 @@ class ProfileViewModel extends ChangeNotifier {
             modeloMotoController.text.trim().isEmpty
                 ? null
                 : modeloMotoController.text.trim(),
+        'apodo':
+            apodoController.text.trim().isEmpty
+                ? null
+                : apodoController.text.trim(),
       };
 
       // Actualizar en Supabase usando upsert
@@ -250,10 +256,14 @@ class ProfileViewModel extends ChangeNotifier {
   Future<bool> updateProfile({
     required String nombre,
     String? modeloMoto,
+    String? apodo,
   }) async {
     nombreController.text = nombre;
     if (modeloMoto != null) {
       modeloMotoController.text = modeloMoto;
+    }
+    if (apodo != null) {
+      apodoController.text = apodo;
     }
     return await guardarPerfil();
   }

@@ -16,6 +16,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _correoController = TextEditingController();
   final TextEditingController _modeloMotoController = TextEditingController();
+  final TextEditingController _apodoController = TextEditingController();
 
   bool _cargando = true;
   bool _subiendoImagen = false;
@@ -35,6 +36,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
     _nombreController.dispose();
     _correoController.dispose();
     _modeloMotoController.dispose();
+    _apodoController.dispose();
     super.dispose();
   }
 
@@ -74,7 +76,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         final respuesta =
             await Supabase.instance.client
                 .from('usuarios')
-                .select('nombre, modelo_moto, foto_perfil_url')
+                .select('nombre, modelo_moto, foto_perfil_url, apodo')
                 .eq(
                   'id',
                   _userId!,
@@ -84,6 +86,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
         if (mounted) {
           _nombreController.text = respuesta['nombre'] ?? 'Completa tu nombre';
           _modeloMotoController.text = respuesta['modelo_moto'] ?? '';
+          _apodoController.text = respuesta['apodo'] ?? '';
           _avatarUrl = respuesta['foto_perfil_url'] as String?;
         }
       } catch (e) {
@@ -149,6 +152,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
               _modeloMotoController.text.trim().isEmpty
                   ? null
                   : _modeloMotoController.text.trim(),
+          'apodo':
+              _apodoController.text.trim().isEmpty
+                  ? null
+                  : _apodoController.text.trim(),
         });
 
         if (mounted) {
@@ -311,6 +318,56 @@ class _PerfilScreenState extends State<PerfilScreen> {
     }
   }
 
+  /// Cierra la sesión del usuario
+  Future<void> _cerrarSesion() async {
+    // Confirmar antes de cerrar sesión
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cerrar sesión'),
+        content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar != true) return;
+
+    setState(() => _cargando = true);
+
+    try {
+      // Cerrar sesión en Supabase - esto limpia toda la sesión persistida
+      await Supabase.instance.client.auth.signOut();
+
+      if (mounted) {
+        // Navegar a login y limpiar todo el stack de navegación
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/login',
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _cargando = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cerrar sesión: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   /// Elimina la foto de perfil
   Future<void> _eliminarFoto() async {
     if (_userId == null) return;
@@ -455,6 +512,17 @@ class _PerfilScreenState extends State<PerfilScreen> {
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
+                        controller: _apodoController,
+                        decoration: const InputDecoration(
+                          labelText: "Apodo",
+                          hintText: "Se mostrará en rutas grupales",
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.badge),
+                        ),
+                        maxLength: 20,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
                         controller: _correoController,
                         decoration: const InputDecoration(
                           labelText: "Correo Electrónico",
@@ -511,6 +579,21 @@ class _PerfilScreenState extends State<PerfilScreen> {
                           }
                         },
                       ),
+                      const SizedBox(height: 32),
+                      const Divider(),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.logout),
+                        label: const Text("Cerrar Sesión"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          textStyle: const TextStyle(fontSize: 16),
+                        ),
+                        onPressed: _cargando ? null : _cerrarSesion,
+                      ),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),

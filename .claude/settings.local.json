@@ -6,7 +6,10 @@
       "Bash(Out-File -FilePath \"analyze_output.txt\" -Encoding UTF8)",
       "Bash(analyze_output.txt)",
       "Bash(findstr:*)",
-      "Bash(tee:*)"
+      "Bash(tee:*)",
+      "Bash(nul)",
+      "Bash(dir:*)",
+      "Bash(del \"C:\\Users\\VictorVasquez\\Documents\\MotoConnect\\lib\\presentation\\widgets\\location_selector_field.dart\")"
     ],
     "deny": [],
     "ask": []

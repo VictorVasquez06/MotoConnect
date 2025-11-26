@@ -16,6 +16,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _phoneController = TextEditingController();
   final _bioController = TextEditingController();
   final _locationController = TextEditingController();
+  final _apodoController = TextEditingController();
 
   String? _selectedMotorcycleBrand;
   String? _selectedMotorcycleModel;
@@ -52,6 +53,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _nameController.text = viewModel.nombreController.text;
       _emailController.text = viewModel.correoController.text;
       _selectedMotorcycleModel = viewModel.modeloMotoController.text;
+      _apodoController.text = viewModel.apodoController.text;
 
       // Campos adicionales por ahora vacíos (para futuras implementaciones)
       _phoneController.text = '';
@@ -67,6 +69,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _phoneController.dispose();
     _bioController.dispose();
     _locationController.dispose();
+    _apodoController.dispose();
     super.dispose();
   }
 
@@ -173,6 +176,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             }
             return null;
           },
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: _apodoController,
+          decoration: const InputDecoration(
+            labelText: 'Apodo',
+            prefixIcon: Icon(Icons.badge),
+            border: OutlineInputBorder(),
+            hintText: 'Se mostrará en rutas grupales',
+          ),
+          maxLength: 20,
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -427,6 +441,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         .updateProfile(
           nombre: _nameController.text.trim(),
           modeloMoto: _selectedMotorcycleModel?.trim(),
+          apodo: _apodoController.text.trim(),
         )
         .then((success) {
           setState(() {

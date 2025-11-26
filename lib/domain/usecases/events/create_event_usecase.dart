@@ -53,10 +53,27 @@ class CreateEventUseCase {
         title: processedData['title'] as String,
         description: processedData['description'] as String,
         date: eventDate,
-        location: processedData['location'] as String,
+        puntoEncuentro: processedData['punto_encuentro'] as String? ??
+                        processedData['puntoEncuentro'] as String? ??
+                        processedData['location'] as String? ?? '',
         createdBy: processedData['createdBy'] as String? ??
                    processedData['userId'] as String? ??
                    processedData['organizerId'] as String? ?? '',
+        destino: processedData['destino'] as String?,
+        puntoEncuentroLat: (processedData['punto_encuentro_lat'] as num?)?.toDouble() ??
+                           (processedData['puntoEncuentroLat'] as num?)?.toDouble(),
+        puntoEncuentroLng: (processedData['punto_encuentro_lng'] as num?)?.toDouble() ??
+                           (processedData['puntoEncuentroLng'] as num?)?.toDouble(),
+        destinoLat: (processedData['destino_lat'] as num?)?.toDouble() ??
+                    (processedData['destinoLat'] as num?)?.toDouble(),
+        destinoLng: (processedData['destino_lng'] as num?)?.toDouble() ??
+                    (processedData['destinoLng'] as num?)?.toDouble(),
+        fotoUrl: processedData['foto_url'] as String? ??
+                 processedData['fotoUrl'] as String?,
+        grupoId: processedData['grupo_id'] as String? ??
+                 processedData['grupoId'] as String?,
+        isPublic: processedData['is_public'] as bool? ??
+                  processedData['isPublic'] as bool? ?? true,
       );
 
       return Right(event);

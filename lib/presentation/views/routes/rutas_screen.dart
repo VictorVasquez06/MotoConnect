@@ -9,7 +9,17 @@ import 'dart:async';
 
 class RutasScreen extends StatefulWidget {
   final Map<String, dynamic>? rutaInicial;
-  const RutasScreen({super.key, this.rutaInicial});
+  final LatLng? destinoInicial;
+  final String? nombreDestino;
+  final bool modoSeleccion; // Modo para seleccionar ubicación y retornar
+
+  const RutasScreen({
+    super.key,
+    this.rutaInicial,
+    this.destinoInicial,
+    this.nombreDestino,
+    this.modoSeleccion = false, // Por defecto en modo normal
+  });
 
   @override
   State<RutasScreen> createState() => _RutasScreenState();
@@ -31,6 +41,10 @@ class _RutasScreenState extends State<RutasScreen> {
   final String _googleApiKey =
       "AIzaSyDTFLe8BeQLca2P5ES7vXetX3icv7jiFEE"; // Tu clave API
   // bool _cargando = false; // Descomentar si quieres usar un indicador de carga
+
+  // Variables para modo selección
+  LatLng? _ubicacionSeleccionada;
+  String? _direccionSeleccionada;
 
   @override
   void initState() {
@@ -112,6 +126,11 @@ class _RutasScreenState extends State<RutasScreen> {
           16,
         ),
       );
+
+      // Si hay un destino inicial, trazar la ruta automáticamente
+      if (widget.destinoInicial != null) {
+        _trazarRutaADestino(widget.destinoInicial!, widget.nombreDestino);
+      }
     } catch (e) {
       print("Error obteniendo ubicación: $e");
     }
@@ -165,6 +184,47 @@ class _RutasScreenState extends State<RutasScreen> {
     }
   }
 
+  /// Traza la ruta hacia un destino específico (usado para destino inicial desde eventos)
+  Future<void> _trazarRutaADestino(LatLng destino, String? nombreDestino) async {
+    if (!mounted) return;
+
+    // Crear marcador en el destino
+    setState(() {
+      _searchedMarker = Marker(
+        markerId: const MarkerId("destino_evento"),
+        position: destino,
+        infoWindow: InfoWindow(title: nombreDestino ?? "Destino"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      );
+      if (nombreDestino != null) {
+        _searchController.text = nombreDestino;
+      }
+    });
+
+    // Animar cámara para mostrar el destino
+    _mapController?.animateCamera(CameraUpdate.newLatLngZoom(destino, 14));
+
+    // Trazar la ruta desde la ubicación actual
+    await _getRoute(destino);
+
+    // Ajustar la cámara para mostrar toda la ruta
+    if (_polylineCoordinates.isNotEmpty && _mapController != null) {
+      final bounds = _calculateBounds(_polylineCoordinates);
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLngBounds(bounds, 100), // 100 es padding
+      );
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ruta trazada hacia ${nombreDestino ?? "el destino"}'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   void _selectPrediction(AutocompletePrediction prediction) async {
     FocusScope.of(context).unfocus();
     final detail = await googlePlace.details.get(prediction.placeId!);
@@ -174,17 +234,35 @@ class _RutasScreenState extends State<RutasScreen> {
         mounted) {
       final location = detail.result!.geometry!.location!;
       final latLng = LatLng(location.lat!, location.lng!);
-      setState(() {
-        _searchedMarker = Marker(
-          markerId: MarkerId(prediction.placeId!),
-          position: latLng,
-          infoWindow: InfoWindow(title: detail.result!.name),
-        );
-        predictions = [];
-        _searchController.text = detail.result!.name!;
-      });
-      _mapController?.animateCamera(CameraUpdate.newLatLngZoom(latLng, 15));
-      await _getRoute(latLng);
+
+      // Si está en modo selección, guardar la ubicación y dirección
+      if (widget.modoSeleccion) {
+        setState(() {
+          _ubicacionSeleccionada = latLng;
+          _direccionSeleccionada = detail.result!.formattedAddress ?? detail.result!.name ?? prediction.description;
+          _searchedMarker = Marker(
+            markerId: MarkerId(prediction.placeId!),
+            position: latLng,
+            infoWindow: InfoWindow(title: detail.result!.name),
+          );
+          predictions = [];
+          _searchController.text = detail.result!.name!;
+        });
+        _mapController?.animateCamera(CameraUpdate.newLatLngZoom(latLng, 15));
+      } else {
+        // Modo normal, trazar ruta
+        setState(() {
+          _searchedMarker = Marker(
+            markerId: MarkerId(prediction.placeId!),
+            position: latLng,
+            infoWindow: InfoWindow(title: detail.result!.name),
+          );
+          predictions = [];
+          _searchController.text = detail.result!.name!;
+        });
+        _mapController?.animateCamera(CameraUpdate.newLatLngZoom(latLng, 15));
+        await _getRoute(latLng);
+      }
     }
   }
 
@@ -661,9 +739,23 @@ class _RutasScreenState extends State<RutasScreen> {
           ),
           // if (_cargando) // Descomentar si usas un indicador de carga
           //   const Center(child: CircularProgressIndicator()),
-          ],
+        ],
         ),
       ),
+      // Botón flotante para confirmar selección (solo en modo selección)
+      floatingActionButton: widget.modoSeleccion && _ubicacionSeleccionada != null
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.pop(context, {
+                  'latitud': _ubicacionSeleccionada!.latitude,
+                  'longitud': _ubicacionSeleccionada!.longitude,
+                  'direccion': _direccionSeleccionada ?? '',
+                });
+              },
+              icon: const Icon(Icons.check),
+              label: const Text('Confirmar Ubicación'),
+            )
+          : null,
     );
   }
 }

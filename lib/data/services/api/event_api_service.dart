@@ -12,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/config/supabase_config.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../models/event_model.dart';
+import '../../models/event_participant_model.dart';
 
 class EventApiService {
   // ========================================
@@ -30,10 +31,20 @@ class EventApiService {
     try {
       final response = await _supabase
           .from(ApiConstants.eventsTable)
-          .select()
+          .select('''
+            *,
+            grupos_ruta!left(nombre)
+          ''')
           .order('fecha_hora', ascending: true);
 
-      return (response as List).map((json) => Event.fromJson(json)).toList();
+      // Mapear la respuesta y extraer el nombre del grupo
+      return (response as List).map((json) {
+        // Si hay un grupo asociado, extraer su nombre
+        if (json['grupos_ruta'] != null && json['grupos_ruta'] is Map) {
+          json['grupo_nombre'] = json['grupos_ruta']['nombre'];
+        }
+        return Event.fromJson(json);
+      }).toList();
     } catch (e) {
       throw Exception('Error al obtener eventos: ${e.toString()}');
     }
@@ -45,11 +56,20 @@ class EventApiService {
       final response =
           await _supabase
               .from(ApiConstants.eventsTable)
-              .select()
+              .select('''
+                *,
+                grupos_ruta!left(nombre)
+              ''')
               .eq('id', eventId)
               .maybeSingle();
 
       if (response == null) return null;
+
+      // Si hay un grupo asociado, extraer su nombre
+      if (response['grupos_ruta'] != null && response['grupos_ruta'] is Map) {
+        response['grupo_nombre'] = response['grupos_ruta']['nombre'];
+      }
+
       return Event.fromJson(response);
     } catch (e) {
       throw Exception('Error al obtener evento: ${e.toString()}');
@@ -61,20 +81,39 @@ class EventApiService {
     required String title,
     required String description,
     required DateTime date,
-    required String location,
+    required String puntoEncuentro,
     required String createdBy,
+    String? destino,
+    double? puntoEncuentroLat,
+    double? puntoEncuentroLng,
+    double? destinoLat,
+    double? destinoLng,
+    String? fotoUrl,
+    String? grupoId,
+    bool isPublic = true,
   }) async {
     try {
+      final Map<String, dynamic> data = {
+        'titulo': title,
+        'descripcion': description,
+        'fecha_hora': date.toIso8601String(),
+        'punto_encuentro': puntoEncuentro,
+        'creado_por': createdBy,
+        'is_public': isPublic,
+      };
+
+      if (destino != null) data['destino'] = destino;
+      if (puntoEncuentroLat != null) data['punto_encuentro_lat'] = puntoEncuentroLat;
+      if (puntoEncuentroLng != null) data['punto_encuentro_lng'] = puntoEncuentroLng;
+      if (destinoLat != null) data['destino_lat'] = destinoLat;
+      if (destinoLng != null) data['destino_lng'] = destinoLng;
+      if (fotoUrl != null) data['foto_url'] = fotoUrl;
+      if (grupoId != null) data['grupo_id'] = grupoId;
+
       final response =
           await _supabase
               .from(ApiConstants.eventsTable)
-              .insert({
-                'titulo': title,
-                'descripcion': description,
-                'fecha_hora': date.toIso8601String(),
-                'ubicacion': location,
-                'creado_por': createdBy,
-              })
+              .insert(data)
               .select()
               .single();
 
@@ -90,14 +129,30 @@ class EventApiService {
     String? title,
     String? description,
     DateTime? date,
-    String? location,
+    String? puntoEncuentro,
+    String? destino,
+    double? puntoEncuentroLat,
+    double? puntoEncuentroLng,
+    double? destinoLat,
+    double? destinoLng,
+    String? fotoUrl,
+    String? grupoId,
+    bool? isPublic,
   }) async {
     try {
       final Map<String, dynamic> updates = {};
       if (title != null) updates['titulo'] = title;
       if (description != null) updates['descripcion'] = description;
       if (date != null) updates['fecha_hora'] = date.toIso8601String();
-      if (location != null) updates['ubicacion'] = location;
+      if (puntoEncuentro != null) updates['punto_encuentro'] = puntoEncuentro;
+      if (destino != null) updates['destino'] = destino;
+      if (puntoEncuentroLat != null) updates['punto_encuentro_lat'] = puntoEncuentroLat;
+      if (puntoEncuentroLng != null) updates['punto_encuentro_lng'] = puntoEncuentroLng;
+      if (destinoLat != null) updates['destino_lat'] = destinoLat;
+      if (destinoLng != null) updates['destino_lng'] = destinoLng;
+      if (fotoUrl != null) updates['foto_url'] = fotoUrl;
+      if (grupoId != null) updates['grupo_id'] = grupoId;
+      if (isPublic != null) updates['is_public'] = isPublic;
 
       await _supabase
           .from(ApiConstants.eventsTable)
@@ -121,16 +176,37 @@ class EventApiService {
   // MÉTODOS PÚBLICOS - PARTICIPANTES
   // ========================================
 
-  /// Registra un usuario a un evento
-  Future<void> joinEvent(String eventId, String userId) async {
+  /// Registra un usuario a un evento con estado de asistencia
+  Future<void> joinEvent(
+    String eventId,
+    String userId, {
+    EstadoAsistencia estado = EstadoAsistencia.confirmado,
+  }) async {
     try {
       await _supabase.from(ApiConstants.eventParticipantsTable).insert({
         'evento_id': eventId,
         'usuario_id': userId,
-        'estado': 'confirmado',
+        'estado': estado.toStringValue(),
       });
     } catch (e) {
       throw Exception('Error al unirse al evento: ${e.toString()}');
+    }
+  }
+
+  /// Actualiza el estado de asistencia de un participante
+  Future<void> updateAttendanceStatus(
+    String eventId,
+    String userId,
+    EstadoAsistencia estado,
+  ) async {
+    try {
+      await _supabase
+          .from(ApiConstants.eventParticipantsTable)
+          .update({'estado': estado.toStringValue()})
+          .eq('evento_id', eventId)
+          .eq('usuario_id', userId);
+    } catch (e) {
+      throw Exception('Error al actualizar estado de asistencia: ${e.toString()}');
     }
   }
 
@@ -147,7 +223,7 @@ class EventApiService {
     }
   }
 
-  /// Obtiene participantes de un evento
+  /// Obtiene participantes de un evento (solo IDs de confirmados)
   Future<List<String>> getEventParticipants(String eventId) async {
     try {
       final response = await _supabase
@@ -161,6 +237,34 @@ class EventApiService {
           .toList();
     } catch (e) {
       throw Exception('Error al obtener participantes: ${e.toString()}');
+    }
+  }
+
+  /// Obtiene participantes detallados de un evento con información de usuario
+  Future<List<EventParticipantModel>> getEventParticipantsDetailed(
+    String eventId,
+  ) async {
+    try {
+      // Join con usuarios para obtener información completa
+      final response = await _supabase
+          .from(ApiConstants.eventParticipantsTable)
+          .select('''
+            *,
+            usuarios (
+              id,
+              nombre,
+              apodo,
+              foto_perfil_url
+            )
+          ''')
+          .eq('evento_id', eventId)
+          .order('fecha_registro', ascending: true);
+
+      return (response as List)
+          .map((json) => EventParticipantModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Error al obtener participantes detallados: ${e.toString()}');
     }
   }
 
@@ -189,12 +293,20 @@ class EventApiService {
 
       final response = await _supabase
           .from(ApiConstants.eventsTable)
-          .select()
-          .or('titulo.ilike.%$query%,ubicacion.ilike.%$query%')
+          .select('''
+            *,
+            grupos_ruta!left(nombre)
+          ''')
+          .or('titulo.ilike.%$query%,punto_encuentro.ilike.%$query%,destino.ilike.%$query%')
           .order('fecha_hora', ascending: true)
           .limit(20);
 
-      return (response as List).map((json) => Event.fromJson(json)).toList();
+      return (response as List).map((json) {
+        if (json['grupos_ruta'] != null && json['grupos_ruta'] is Map) {
+          json['grupo_nombre'] = json['grupos_ruta']['nombre'];
+        }
+        return Event.fromJson(json);
+      }).toList();
     } catch (e) {
       throw Exception('Error al buscar eventos: ${e.toString()}');
     }
@@ -206,11 +318,21 @@ class EventApiService {
       final now = DateTime.now().toIso8601String();
       final response = await _supabase
           .from(ApiConstants.eventsTable)
-          .select()
+          .select('''
+            *,
+            grupos_ruta!left(nombre)
+          ''')
           .gte('fecha_hora', now)
           .order('fecha_hora', ascending: true);
 
-      return (response as List).map((json) => Event.fromJson(json)).toList();
+      // Mapear la respuesta y extraer el nombre del grupo
+      return (response as List).map((json) {
+        // Si hay un grupo asociado, extraer su nombre
+        if (json['grupos_ruta'] != null && json['grupos_ruta'] is Map) {
+          json['grupo_nombre'] = json['grupos_ruta']['nombre'];
+        }
+        return Event.fromJson(json);
+      }).toList();
     } catch (e) {
       throw Exception('Error al obtener eventos próximos: ${e.toString()}');
     }
@@ -222,11 +344,19 @@ class EventApiService {
       final now = DateTime.now().toIso8601String();
       final response = await _supabase
           .from(ApiConstants.eventsTable)
-          .select()
+          .select('''
+            *,
+            grupos_ruta!left(nombre)
+          ''')
           .lt('fecha_hora', now)
           .order('fecha_hora', ascending: false);
 
-      return (response as List).map((json) => Event.fromJson(json)).toList();
+      return (response as List).map((json) {
+        if (json['grupos_ruta'] != null && json['grupos_ruta'] is Map) {
+          json['grupo_nombre'] = json['grupos_ruta']['nombre'];
+        }
+        return Event.fromJson(json);
+      }).toList();
     } catch (e) {
       throw Exception('Error al obtener eventos pasados: ${e.toString()}');
     }
@@ -237,11 +367,19 @@ class EventApiService {
     try {
       final response = await _supabase
           .from(ApiConstants.eventsTable)
-          .select()
+          .select('''
+            *,
+            grupos_ruta!left(nombre)
+          ''')
           .eq('creado_por', userId)
           .order('fecha_hora', ascending: false);
 
-      return (response as List).map((json) => Event.fromJson(json)).toList();
+      return (response as List).map((json) {
+        if (json['grupos_ruta'] != null && json['grupos_ruta'] is Map) {
+          json['grupo_nombre'] = json['grupos_ruta']['nombre'];
+        }
+        return Event.fromJson(json);
+      }).toList();
     } catch (e) {
       throw Exception('Error al obtener eventos del usuario: ${e.toString()}');
     }
@@ -264,11 +402,19 @@ class EventApiService {
       // Obtener los eventos correspondientes
       final response = await _supabase
           .from(ApiConstants.eventsTable)
-          .select()
+          .select('''
+            *,
+            grupos_ruta!left(nombre)
+          ''')
           .inFilter('id', eventIds)
           .order('fecha_hora', ascending: true);
 
-      return (response as List).map((json) => Event.fromJson(json)).toList();
+      return (response as List).map((json) {
+        if (json['grupos_ruta'] != null && json['grupos_ruta'] is Map) {
+          json['grupo_nombre'] = json['grupos_ruta']['nombre'];
+        }
+        return Event.fromJson(json);
+      }).toList();
     } catch (e) {
       throw Exception(
           'Error al obtener eventos donde participa el usuario: ${e.toString()}');
@@ -307,11 +453,19 @@ class EventApiService {
     try {
       final response = await _supabase
           .from(ApiConstants.eventsTable)
-          .select()
-          .ilike('ubicacion', '%$location%')
+          .select('''
+            *,
+            grupos_ruta!left(nombre)
+          ''')
+          .or('punto_encuentro.ilike.%$location%,destino.ilike.%$location%')
           .order('fecha_hora', ascending: true);
 
-      return (response as List).map((json) => Event.fromJson(json)).toList();
+      return (response as List).map((json) {
+        if (json['grupos_ruta'] != null && json['grupos_ruta'] is Map) {
+          json['grupo_nombre'] = json['grupos_ruta']['nombre'];
+        }
+        return Event.fromJson(json);
+      }).toList();
     } catch (e) {
       throw Exception('Error al obtener eventos por ubicación: ${e.toString()}');
     }
@@ -325,12 +479,20 @@ class EventApiService {
     try {
       final response = await _supabase
           .from(ApiConstants.eventsTable)
-          .select()
+          .select('''
+            *,
+            grupos_ruta!left(nombre)
+          ''')
           .gte('fecha_hora', startDate.toIso8601String())
           .lte('fecha_hora', endDate.toIso8601String())
           .order('fecha_hora', ascending: true);
 
-      return (response as List).map((json) => Event.fromJson(json)).toList();
+      return (response as List).map((json) {
+        if (json['grupos_ruta'] != null && json['grupos_ruta'] is Map) {
+          json['grupo_nombre'] = json['grupos_ruta']['nombre'];
+        }
+        return Event.fromJson(json);
+      }).toList();
     } catch (e) {
       throw Exception(
           'Error al obtener eventos por rango de fechas: ${e.toString()}');

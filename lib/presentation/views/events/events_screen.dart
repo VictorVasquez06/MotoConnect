@@ -1,105 +1,122 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../viewmodels/events/events_viewmodel.dart';
+import 'package:intl/intl.dart';
 import '../../../data/models/event_model.dart';
+import '../../../data/repositories/event_repository.dart';
+import 'create_event_screen.dart';
+import 'event_detail_screen.dart';
 
 /// La Vista (View) para la pantalla de eventos.
 ///
-/// Utiliza `ChangeNotifierProvider` para crear e inyectar el `EventsViewModel`.
-/// El ViewModel se inicializa llamando a `fetchEvents()` inmediatamente después
-/// de su creación.
-class EventosScreen extends StatelessWidget {
+/// Maneja su propio estado sin depender de Provider
+class EventosScreen extends StatefulWidget {
   const EventosScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      // Se crea el ViewModel y se llama al método para cargar los eventos.
-      create: (context) => EventsViewModel()..fetchEvents(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Próximos Eventos'),
-          actions: [
-            // Botón de refrescar
-            Consumer<EventsViewModel>(
-              builder: (context, viewModel, _) {
-                return IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed:
-                      viewModel.status == EventStatus.loading
-                          ? null
-                          : () => viewModel.refreshEvents(),
-                );
-              },
-            ),
-          ],
-        ),
-        // El cuerpo de la vista consume el estado del ViewModel.
-        body: Consumer<EventsViewModel>(
-          builder: (context, viewModel, child) {
-            // Se muestra una UI diferente según el estado de carga.
-            switch (viewModel.status) {
-              case EventStatus.loading:
-                return const Center(child: CircularProgressIndicator());
-              case EventStatus.error:
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        viewModel.errorMessage ?? 'Error desconocido',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => viewModel.refreshEvents(),
-                        child: const Text('Reintentar'),
-                      ),
-                    ],
-                  ),
-                );
-              case EventStatus.success:
-                return _EventList(events: viewModel.events);
-              default:
-                return const SizedBox.shrink();
-            }
-          },
-        ),
-        // Botón flotante para crear evento (opcional)
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // TODO: Navegar a pantalla de crear evento
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Función de crear evento próximamente'),
-              ),
-            );
-          },
-          child: const Icon(Icons.add),
-        ),
-      ),
-    );
-  }
+  State<EventosScreen> createState() => _EventosScreenState();
 }
 
-/// Widget para mostrar la lista de eventos.
-///
-/// Recibe la lista de eventos y la renderiza.
-class _EventList extends StatelessWidget {
-  final List<Event> events;
+class _EventosScreenState extends State<EventosScreen> {
+  final _eventRepository = EventRepository();
+  List<Event> _events = [];
+  bool _isLoading = true;
+  String? _errorMessage;
 
-  const _EventList({required this.events});
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+  }
+
+  Future<void> _loadEvents() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final events = await _eventRepository.getUpcomingEvents();
+      if (mounted) {
+        setState(() {
+          _events = events;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _refreshEvents() async {
+    await _loadEvents();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (events.isEmpty) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Próximos Eventos'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _isLoading ? null : _refreshEvents,
+          ),
+        ],
+      ),
+      body: _buildBody(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CreateEventScreen(),
+            ),
+          );
+          if (result == true && mounted) {
+            _refreshEvents();
+          }
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.red,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _errorMessage ?? 'Error desconocido',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _refreshEvents,
+              child: const Text('Reintentar'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_events.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -116,15 +133,25 @@ class _EventList extends StatelessWidget {
     }
 
     return RefreshIndicator(
-      onRefresh: () async {
-        await context.read<EventsViewModel>().refreshEvents();
-      },
+      onRefresh: _refreshEvents,
       child: ListView.builder(
         padding: const EdgeInsets.all(8),
-        itemCount: events.length,
+        itemCount: _events.length,
         itemBuilder: (context, index) {
-          final event = events[index];
-          return _EventCard(event: event);
+          final event = _events[index];
+          return _EventCard(
+            event: event,
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EventDetailScreen(eventId: event.id),
+                ),
+              );
+              // Recargar eventos al volver por si hubo cambios
+              _refreshEvents();
+            },
+          );
         },
       ),
     );
@@ -134,95 +161,151 @@ class _EventList extends StatelessWidget {
 /// Widget de tarjeta para mostrar un evento
 class _EventCard extends StatelessWidget {
   final Event event;
+  final VoidCallback onTap;
 
-  const _EventCard({required this.event});
+  const _EventCard({
+    required this.event,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       elevation: 2,
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () {
-          // TODO: Navegar a detalle del evento
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Evento: ${event.title}')));
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Título del evento
-              Text(
-                event.title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-
-              // Fecha y hora
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today, size: 16),
-                  const SizedBox(width: 8),
-                  Text(
-                    _formatDate(event.date),
-                    style: Theme.of(context).textTheme.bodyMedium,
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Imagen del evento (si existe)
+            if (event.fotoUrl != null)
+              Image.network(
+                event.fotoUrl!,
+                height: 150,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 150,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.event, size: 60, color: Colors.grey),
+                  );
+                },
+              )
+            else
+              Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).primaryColor.withOpacity(0.7),
+                    ],
                   ),
-                ],
+                ),
+                child: const Center(
+                  child: Icon(Icons.event, size: 60, color: Colors.white70),
+                ),
               ),
-              const SizedBox(height: 4),
 
-              // Ubicación
-              Row(
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.location_on, size: 16),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      event.location,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      maxLines: 1,
+                  // Chip de grupo (si existe)
+                  if (event.grupoNombre != null) ...[
+                    Chip(
+                      avatar: const Icon(Icons.group, size: 16),
+                      label: Text(
+                        event.grupoNombre!,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      backgroundColor:
+                          Theme.of(context).primaryColor.withOpacity(0.1),
+                      padding: EdgeInsets.zero,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+
+                  // Título del evento
+                  Text(
+                    event.title,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Fecha y hora
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today, size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        DateFormat('dd/MM/yyyy - HH:mm').format(event.date),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+
+                  // Ubicación
+                  Row(
+                    children: [
+                      const Icon(Icons.flag, size: 16),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          event.puntoEncuentro,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Destino si existe
+                  if (event.destino != null && event.destino!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, size: 16),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            event.destino!,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+
+                  // Descripción
+                  if (event.description.isNotEmpty)
+                    Text(
+                      event.description,
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
                 ],
               ),
-              const SizedBox(height: 8),
-
-              // Descripción
-              if (event.description.isNotEmpty)
-                Text(
-                  event.description,
-                  style: Theme.of(context).textTheme.bodySmall,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    final months = [
-      'Ene',
-      'Feb',
-      'Mar',
-      'Abr',
-      'May',
-      'Jun',
-      'Jul',
-      'Ago',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dic',
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year} - ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 }

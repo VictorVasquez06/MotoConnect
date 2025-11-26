@@ -24,6 +24,9 @@ class UserModel {
   /// URL de foto de perfil (opcional)
   final String? fotoPerfil;
 
+  /// Apodo del usuario que se muestra en el mapa durante rutas grupales (opcional)
+  final String? apodo;
+
   /// Constructor
   const UserModel({
     required this.id,
@@ -31,6 +34,7 @@ class UserModel {
     required this.nombre,
     this.modeloMoto,
     this.fotoPerfil,
+    this.apodo,
   });
 
   /// Crea una instancia desde JSON
@@ -41,6 +45,7 @@ class UserModel {
       nombre: json['nombre'] as String,
       modeloMoto: json['modelo_moto'] as String?,
       fotoPerfil: json['foto_perfil_url'] as String?,
+      apodo: json['apodo'] as String?,
     );
   }
 
@@ -52,6 +57,7 @@ class UserModel {
       'nombre': nombre,
       'modelo_moto': modeloMoto,
       'foto_perfil_url': fotoPerfil,
+      'apodo': apodo,
     };
   }
 
@@ -62,6 +68,7 @@ class UserModel {
     String? nombre,
     String? modeloMoto,
     String? fotoPerfil,
+    String? apodo,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -69,6 +76,7 @@ class UserModel {
       nombre: nombre ?? this.nombre,
       modeloMoto: modeloMoto ?? this.modeloMoto,
       fotoPerfil: fotoPerfil ?? this.fotoPerfil,
+      apodo: apodo ?? this.apodo,
     );
   }
 }

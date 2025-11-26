@@ -21,8 +21,10 @@ class StorageService {
   // ========================================
 
   static const String _avatarsBucket = 'avatars';
+  static const String _communityMediaBucket = 'community-media';
   static const String _avatarFileName = 'avatar.jpg';
   static const int _maxFileSizeInBytes = 5 * 1024 * 1024; // 5 MB
+  static const int _maxVideoSizeInBytes = 50 * 1024 * 1024; // 50 MB para videos
 
   // ========================================
   // MÉTODOS PÚBLICOS
@@ -149,6 +151,152 @@ class StorageService {
     } catch (e) {
       print('Error al verificar avatar: $e');
       return false;
+    }
+  }
+
+  // ========================================
+  // MÉTODOS PARA MEDIA DE COMUNIDAD
+  // ========================================
+
+  /// Sube una imagen o video para una publicación de comunidad
+  ///
+  /// [mediaFile] - Archivo de imagen o video a subir
+  /// [userId] - ID del usuario que sube el archivo
+  /// [postId] - ID único de la publicación (usar timestamp o UUID)
+  /// [isVideo] - true si es un video, false si es imagen
+  ///
+  /// Retorna:
+  /// - String con la URL pública del archivo subido
+  ///
+  /// Lanza:
+  /// - Exception si el archivo es muy grande
+  /// - Exception si falla la subida
+  Future<String> uploadCommunityMedia({
+    required File mediaFile,
+    required String userId,
+    required String postId,
+    required bool isVideo,
+  }) async {
+    try {
+      // Verificar tamaño del archivo
+      final fileSize = await mediaFile.length();
+      final maxSize = isVideo ? _maxVideoSizeInBytes : _maxFileSizeInBytes;
+
+      if (fileSize > maxSize) {
+        throw Exception(
+          'El archivo es demasiado grande. Máximo permitido: ${maxSize ~/ (1024 * 1024)} MB',
+        );
+      }
+
+      // Leer los bytes del archivo
+      final bytes = await mediaFile.readAsBytes();
+
+      // Obtener extensión del archivo
+      final extension = mediaFile.path.split('.').last.toLowerCase();
+
+      // Ruta del archivo en el bucket: community-media/{userId}/{postId}.{extension}
+      final filePath = '$userId/$postId.$extension';
+
+      // Determinar content type
+      String contentType;
+      if (isVideo) {
+        if (extension == 'mp4') {
+          contentType = 'video/mp4';
+        } else if (extension == 'mov') {
+          contentType = 'video/quicktime';
+        } else {
+          contentType = 'video/$extension';
+        }
+      } else {
+        if (extension == 'jpg' || extension == 'jpeg') {
+          contentType = 'image/jpeg';
+        } else if (extension == 'png') {
+          contentType = 'image/png';
+        } else {
+          contentType = 'image/$extension';
+        }
+      }
+
+      // Subir el archivo
+      await _supabase.storage
+          .from(_communityMediaBucket)
+          .uploadBinary(
+            filePath,
+            bytes,
+            fileOptions: FileOptions(
+              contentType: contentType,
+              upsert: false, // No sobrescribir
+            ),
+          );
+
+      // Obtener la URL pública
+      final publicUrl = _supabase.storage
+          .from(_communityMediaBucket)
+          .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (e) {
+      print('Error al subir media de comunidad: $e');
+      throw Exception('Error al subir el archivo: ${e.toString()}');
+    }
+  }
+
+  /// Elimina un archivo de media de una publicación de comunidad
+  ///
+  /// [mediaUrl] - URL pública del archivo a eliminar
+  ///
+  /// Retorna:
+  /// - true si se eliminó exitosamente
+  /// - false si hubo un error
+  Future<bool> deleteCommunityMedia({required String mediaUrl}) async {
+    try {
+      // Extraer el path del archivo desde la URL
+      // URL típica: https://xxx.supabase.co/storage/v1/object/public/community-media/{userId}/{postId}.ext
+      final uri = Uri.parse(mediaUrl);
+      final pathSegments = uri.pathSegments;
+
+      // Encontrar el índice donde está 'community-media'
+      final bucketIndex = pathSegments.indexOf(_communityMediaBucket);
+      if (bucketIndex == -1) {
+        throw Exception('URL inválida para media de comunidad');
+      }
+
+      // El path es todo lo que viene después del bucket
+      final filePath = pathSegments.skip(bucketIndex + 1).join('/');
+
+      await _supabase.storage.from(_communityMediaBucket).remove([filePath]);
+      return true;
+    } catch (e) {
+      print('Error al eliminar media de comunidad: $e');
+      return false;
+    }
+  }
+
+  /// Elimina todos los archivos de media de un usuario
+  ///
+  /// [userId] - ID del usuario
+  ///
+  /// Retorna:
+  /// - Número de archivos eliminados
+  Future<int> deleteAllUserCommunityMedia({required String userId}) async {
+    try {
+      // Listar todos los archivos del usuario
+      final files = await _supabase.storage
+          .from(_communityMediaBucket)
+          .list(path: userId);
+
+      if (files.isEmpty) return 0;
+
+      // Crear lista de paths a eliminar
+      final filePaths = files.map((file) => '$userId/${file.name}').toList();
+
+      // Eliminar todos
+      await _supabase.storage.from(_communityMediaBucket).remove(filePaths);
+
+      return filePaths.length;
+    } catch (e) {
+      print('Error al eliminar media del usuario: $e');
+      return 0;
     }
   }
 }

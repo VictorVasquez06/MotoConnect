@@ -77,6 +77,9 @@ class ApiConstants {
   /// Bucket para avatares de usuarios
   static const String avatarsBucket = 'avatars';
 
+  /// Bucket para fotos de eventos
+  static const String eventsBucket = 'eventos';
+
   // ========================================
   // LÍMITES Y CONFIGURACIONES
   // ========================================
