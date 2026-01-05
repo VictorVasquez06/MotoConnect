@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../routes/map_picker_screen.dart';
+import '../routes/rutas_screen.dart';
 
 class TallerConCreador {
   final Map<String, dynamic> tallerData;
@@ -480,53 +480,30 @@ class _TalleresScreenState extends State<TalleresScreen> {
   Future<void> _abrirEnMapa(Map<String, dynamic> taller) async {
     final lat = taller['latitud'] as double?;
     final lon = taller['longitud'] as double?;
-    final address = taller['direccion'] as String?;
-
-    Uri? mapUri;
+    final nombreTaller = taller['nombre'] as String? ?? 'Taller';
 
     if (lat != null && lon != null) {
-      if (Theme.of(context).platform == TargetPlatform.iOS) {
-        mapUri = Uri.parse('maps://?q=$lat,$lon');
-      } else {
-        mapUri = Uri.parse(
-          'geo:$lat,$lon?q=$lat,$lon(${Uri.encodeComponent(taller['nombre'] ?? 'Taller')})',
-        );
-      }
-    } else if (address != null && address.isNotEmpty) {
-      if (Theme.of(context).platform == TargetPlatform.iOS) {
-        mapUri = Uri.parse('maps://?q=${Uri.encodeComponent(address)}');
-      } else {
-        mapUri = Uri.parse('geo:0,0?q=${Uri.encodeComponent(address)}');
-      }
-    }
-
-    if (mapUri != null) {
-      try {
-        if (await canLaunchUrl(mapUri)) {
-          await launchUrl(mapUri);
-        } else {
-          throw 'No se puede lanzar $mapUri';
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('No se pudo abrir el mapa: $e')),
-          );
-        } else {
-          // Error al abrir mapa (context no mounted)
-        }
-      }
+      // Navegar a la pantalla de rutas interna
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RutasScreen(
+            destinoInicial: LatLng(lat, lon),
+            nombreDestino: nombreTaller,
+          ),
+        ),
+      );
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              'No hay dirección o coordenadas disponibles para mostrar en el mapa',
+              'No hay coordenadas disponibles para este taller',
             ),
           ),
         );
       } else {
-        // No hay dirección o coordenadas para el mapa (context no mounted)
+        // No hay coordenadas para el mapa (context no mounted)
       }
     }
   }

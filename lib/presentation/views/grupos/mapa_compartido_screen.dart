@@ -5,7 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/models/sesion_ruta_activa_model.dart';
 import '../../../data/models/grupo_ruta_model.dart';
 import '../../../data/models/ubicacion_tiempo_real_model.dart';
+import '../../../data/models/navigation_progress.dart';
 import '../../../data/repositories/grupo_repository.dart';
+import '../../../data/repositories/navigation_repository.dart';
 import '../../../services/location_tracking_service.dart';
 
 /// Pantalla de mapa compartido con ubicaciones en tiempo real
@@ -28,10 +30,13 @@ class MapaCompartidoScreen extends StatefulWidget {
 class _MapaCompartidoScreenState extends State<MapaCompartidoScreen> {
   GoogleMapController? _mapController;
   final GrupoRepository _grupoRepository = GrupoRepository();
+  final NavigationRepository _navigationRepository = NavigationRepository();
   final LocationTrackingService _trackingService = LocationTrackingService();
 
   Map<String, Marker> _markers = {};
+  Map<String, NavigationProgress> _navigationProgress = {};
   StreamSubscription? _ubicacionesSubscription;
+  StreamSubscription? _navigationProgressSubscription;
   bool _trackingActivo = false;
   bool _centrarEnMi = true;
   String? _miUsuarioId;
@@ -45,6 +50,7 @@ class _MapaCompartidoScreenState extends State<MapaCompartidoScreen> {
   @override
   void dispose() {
     _ubicacionesSubscription?.cancel();
+    _navigationProgressSubscription?.cancel();
     if (_trackingActivo) {
       _trackingService.detenerTracking();
     }
@@ -62,6 +68,9 @@ class _MapaCompartidoScreenState extends State<MapaCompartidoScreen> {
       // Suscribirse a ubicaciones en tiempo real
       _suscribirseAUbicaciones();
 
+      // Suscribirse a progreso de navegación
+      _suscribirseAProgresoNavegacion();
+
       // Iniciar tracking de ubicación propia
       await _iniciarTracking();
     } catch (e) {
@@ -74,6 +83,21 @@ class _MapaCompartidoScreenState extends State<MapaCompartidoScreen> {
         );
       }
     }
+  }
+
+  void _suscribirseAProgresoNavegacion() {
+    _navigationProgressSubscription = _navigationRepository
+        .streamGroupNavigationProgress(widget.sesion.id)
+        .listen((progresos) {
+      final progressMap = <String, NavigationProgress>{};
+      for (final progreso in progresos) {
+        progressMap[progreso.userId] = progreso;
+      }
+
+      setState(() {
+        _navigationProgress = progressMap;
+      });
+    });
   }
 
   void _suscribirseAUbicaciones() {
@@ -134,13 +158,16 @@ class _MapaCompartidoScreenState extends State<MapaCompartidoScreen> {
                   BitmapDescriptor.hueOrange,
                 );
 
+      // Obtener progreso de navegación si existe
+      final progreso = _navigationProgress[ubicacion.usuarioId];
+
       final marker = Marker(
         markerId: markerId,
         position: ubicacion.posicion,
         icon: color,
         infoWindow: InfoWindow(
           title: ubicacion.nombreMostrar,
-          snippet: _buildSnippet(ubicacion),
+          snippet: _buildSnippet(ubicacion, progreso),
         ),
         rotation: ubicacion.direccion ?? 0,
       );
@@ -158,11 +185,22 @@ class _MapaCompartidoScreenState extends State<MapaCompartidoScreen> {
     });
   }
 
-  String _buildSnippet(UbicacionTiempoRealModel ubicacion) {
+  String _buildSnippet(
+    UbicacionTiempoRealModel ubicacion,
+    NavigationProgress? progreso,
+  ) {
     final parts = <String>[];
 
     if (ubicacion.velocidad != null && ubicacion.velocidad! > 0) {
       parts.add('${ubicacion.velocidad!.toStringAsFixed(1)} km/h');
+    }
+
+    // Agregar info de navegación si está navegando
+    if (progreso != null) {
+      parts.add('Paso ${progreso.currentStepIndex + 1}');
+      if (progreso.etaSeconds != null) {
+        parts.add('ETA: ${progreso.etaText}');
+      }
     }
 
     parts.add(ubicacion.tiempoTranscurrido);

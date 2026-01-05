@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:async';
+import '../navigation/navigation_screen.dart';
 
 class RutasScreen extends StatefulWidget {
   final Map<String, dynamic>? rutaInicial;
@@ -218,8 +219,40 @@ class _RutasScreenState extends State<RutasScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Ruta trazada hacia ${nombreDestino ?? "el destino"}'),
-          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          content: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.purple[700],
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.navigation, color: Colors.white, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Ruta trazada hacia ${nombreDestino ?? "el destino"}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const Icon(Icons.check_circle, color: Colors.white, size: 24),
+              ],
+            ),
+          ),
+          duration: const Duration(seconds: 3),
         ),
       );
     }
@@ -431,6 +464,28 @@ class _RutasScreenState extends State<RutasScreen> {
     }
   }
 
+  /// Inicia navegación turn-by-turn
+  void _iniciarNavegacion() {
+    if (_searchedMarker == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No hay destino seleccionado.")),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NavigationScreen(
+          destination: _searchedMarker!.position,
+          destinationName: _searchController.text.isNotEmpty
+              ? _searchController.text
+              : null,
+        ),
+      ),
+    );
+  }
+
   void _mostrarRutaGuardada(Map<String, dynamic> ruta) {
     final List<dynamic>? puntos = ruta['puntos']; // Los puntos vienen como JSON
     if (puntos == null || puntos.isEmpty) {
@@ -489,6 +544,20 @@ class _RutasScreenState extends State<RutasScreen> {
               points: _polylineCoordinates,
             ),
           };
+
+          // Crear marcador en el destino (último punto) para habilitar navegación
+          if (_polylineCoordinates.isNotEmpty) {
+            final destino = _polylineCoordinates.last;
+            _searchedMarker = Marker(
+              markerId: const MarkerId("destino_ruta_guardada"),
+              position: destino,
+              infoWindow: InfoWindow(
+                title: ruta['nombre_ruta'] ?? 'Destino',
+              ),
+            );
+            // Actualizar el texto de búsqueda con el nombre de la ruta
+            _searchController.text = ruta['nombre_ruta'] ?? 'Ruta guardada';
+          }
         });
 
         // Opcional: Centrar el mapa en la ruta
@@ -510,11 +579,60 @@ class _RutasScreenState extends State<RutasScreen> {
           }
         }
 
+        // Mostrar mensaje estético con la ruta seleccionada
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              "Mostrando: ${ruta['nombre_ruta'] ?? 'Ruta guardada'}",
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            content: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.purple[700],
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.route, color: Colors.white, size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          ruta['nombre_ruta'] ?? 'Ruta guardada',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (ruta['descripcion_ruta'] != null &&
+                            ruta['descripcion_ruta'].toString().isNotEmpty)
+                          Text(
+                            ruta['descripcion_ruta'],
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.check_circle, color: Colors.white, size: 24),
+                ],
+              ),
             ),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -676,31 +794,24 @@ class _RutasScreenState extends State<RutasScreen> {
               ],
             ),
           ),
+          // Botón "Rutas guardadas" - Siempre visible
           Positioned(
-            bottom: 110, // O la posición que tengas
+            bottom: 20,
             left: 20,
             child: ElevatedButton.icon(
               icon: const Icon(Icons.route),
               label: const Text("Rutas guardadas"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+              ),
               onPressed: () async {
                 final resultado = await Navigator.pushNamed(
                   context,
                   '/rutas-recomendadas',
                 );
                 if (resultado != null && resultado is Map<String, dynamic>) {
-                  // Ya no se llama a _mostrarRutaGuardada aquí directamente,
-                  // porque la navegación a esta misma pantalla (RutasScreen) con argumentos
-                  // será manejada por didChangeDependencies.
-                  // Si /rutas-recomendadas devuelve un ID para cargar, y navegas
-                  // a RutasScreen con ese ID en los argumentos, didChangeDependencies lo capturará.
-                  // Si devuelve la ruta completa, también lo capturará.
-                  // Si /rutas-recomendadas es una pantalla diferente y devuelve datos a ESTA instancia
-                  // de RutasScreen sin re-navegar, entonces sí necesitarías _mostrarRutaGuardada(resultado).
-                  // Por la lógica de tu código, parece que /rutas-recomendadas te podría dar
-                  // una ruta para mostrar en ESTA pantalla o un ID para recargarla.
-                  // Si es un pop con resultado y no una nueva navegación a RutasScreen:
                   if (mounted && resultado.containsKey('puntos')) {
-                    // Asumiendo que si tiene 'puntos' es la ruta completa
                     _mostrarRutaGuardada(resultado);
                   } else if (mounted &&
                       resultado.containsKey('ruta_id_para_cargar')) {
@@ -714,29 +825,38 @@ class _RutasScreenState extends State<RutasScreen> {
               },
             ),
           ),
+
+          // Botón "Guardar ruta" - Solo visible cuando hay ruta
           if (_polylines.isNotEmpty)
             Positioned(
-              bottom: 20,
+              bottom: 70,
               left: 20,
               child: ElevatedButton.icon(
-                icon: Icon(_siguiendoRuta ? Icons.pause : Icons.play_arrow),
-                label: Text(_siguiendoRuta ? "Detener" : "Iniciar ruta"),
-                onPressed: () {
-                  _siguiendoRuta
-                      ? _detenerSeguimiento()
-                      : _iniciarSeguimiento();
-                },
+                icon: const Icon(Icons.save),
+                label: const Text("Guardar ruta"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: _guardarRutaActual,
               ),
             ),
-          Positioned(
-            bottom: 65,
-            left: 20,
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.save),
-              label: const Text("Guardar ruta"),
-              onPressed: _guardarRutaActual,
+
+          // Botón "Iniciar Navegación" - Solo visible cuando hay ruta y destino
+          if (_polylines.isNotEmpty && _searchedMarker != null)
+            Positioned(
+              bottom: 120,
+              left: 20,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.navigation),
+                label: const Text("Iniciar Navegación"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: _iniciarNavegacion,
+              ),
             ),
-          ),
           // if (_cargando) // Descomentar si usas un indicador de carga
           //   const Center(child: CircularProgressIndicator()),
         ],

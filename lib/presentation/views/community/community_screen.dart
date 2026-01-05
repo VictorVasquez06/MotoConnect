@@ -10,6 +10,7 @@ import 'package:video_player/video_player.dart';
 class PublicacionConAutor {
   final Map<String, dynamic> publicacionData;
   final String? nombreAutor; // Quién hizo la publicación en comunidad
+  final String? avatarUrl; // URL de la foto de perfil del autor (foto_perfil_url)
   final String? nombreRutaCompartida;
   final String? idRutaCompartida;
   final Map<String, dynamic>?
@@ -20,6 +21,7 @@ class PublicacionConAutor {
   PublicacionConAutor({
     required this.publicacionData,
     this.nombreAutor,
+    this.avatarUrl,
     this.nombreRutaCompartida,
     this.idRutaCompartida,
     this.eventoCompartidoData,
@@ -38,7 +40,7 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
   List<PublicacionConAutor> _publicacionesConAutor = [];
   bool _cargando = true;
   final TextEditingController _textoController = TextEditingController();
-  final Map<String, String> _cacheNombres = {}; // Cache para nombres de usuario
+  final Map<String, Map<String, String?>> _cacheUsuarios = {}; // Cache para datos de usuario (nombre y avatar)
   final StorageService _storageService = StorageService();
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -59,31 +61,38 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
     super.dispose();
   }
 
-  Future<String?> _obtenerNombreUsuario(String userId) async {
-    if (_cacheNombres.containsKey(userId)) {
-      return _cacheNombres[userId];
+  Future<Map<String, String?>> _obtenerDatosUsuario(String userId) async {
+    if (_cacheUsuarios.containsKey(userId)) {
+      return _cacheUsuarios[userId]!;
     }
     try {
       final respuesta =
           await Supabase.instance.client
               .from('usuarios')
-              .select('nombre')
+              .select('nombre, foto_perfil_url')
               .eq('id', userId)
               .single();
       final nombre = respuesta['nombre'] as String?;
-      if (nombre != null && mounted) {
-        _cacheNombres[userId] = nombre;
+      final fotoPerfilUrl = respuesta['foto_perfil_url'] as String?;
+
+      final datos = {'nombre': nombre, 'foto_perfil_url': fotoPerfilUrl};
+
+      if (mounted) {
+        _cacheUsuarios[userId] = datos;
       }
-      return nombre;
+      return datos;
     } catch (e) {
-      print("Error obteniendo nombre para usuario $userId (Comunidad): $e");
-      return "Usuario Anónimo"; // O un placeholder que prefieras
+      print("Error obteniendo datos para usuario $userId (Comunidad): $e");
+      return {'nombre': null, 'foto_perfil_url': null};
     }
   }
 
   Future<void> _obtenerPublicaciones() async {
     if (!mounted) return;
     setState(() => _cargando = true);
+
+    // Limpiar el cache de usuarios para obtener datos actualizados
+    _cacheUsuarios.clear();
 
     try {
       final respuestaPublicaciones = await Supabase.instance.client
@@ -94,9 +103,12 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
       List<PublicacionConAutor> tempLista = [];
       for (var publicacionData in respuestaPublicaciones) {
         String? nombreAutor; // Quién hizo la publicación en comunidad
+        String? avatarAutor;
         final autorId = publicacionData['usuario_id'] as String?;
         if (autorId != null) {
-          nombreAutor = await _obtenerNombreUsuario(autorId);
+          final datosAutor = await _obtenerDatosUsuario(autorId);
+          nombreAutor = datosAutor['nombre'];
+          avatarAutor = datosAutor['foto_perfil_url'];
         }
 
         String? nombreRutaComp;
@@ -136,9 +148,10 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
             // Obtener nombre del organizador del evento
             final organizadorIdEvento = eventoDataComp['creado_por'] as String?;
             if (organizadorIdEvento != null) {
-              nombreOrganizadorEv = await _obtenerNombreUsuario(
+              final datosOrganizador = await _obtenerDatosUsuario(
                 organizadorIdEvento,
               );
+              nombreOrganizadorEv = datosOrganizador['nombre'];
             }
           } catch (e) {
             print(
@@ -158,6 +171,7 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
           PublicacionConAutor(
             publicacionData: publicacionData,
             nombreAutor: nombreAutor ?? "Usuario Anónimo",
+            avatarUrl: avatarAutor,
             nombreRutaCompartida: nombreRutaComp,
             idRutaCompartida: idRutaComp,
             eventoCompartidoData: eventoDataComp,
@@ -420,9 +434,41 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
       _limpiarMediaSeleccionada();
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Publicación creada.")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            content: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.purple[700],
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 6,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.check_circle, color: Colors.white, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    "Publicación creada",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
         _obtenerPublicaciones();
       }
     } catch (e) {
@@ -442,7 +488,16 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Comunidad Biker")),
+      appBar: AppBar(
+        title: const Text("Comunidad Biker"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _obtenerPublicaciones,
+            tooltip: 'Refrescar',
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -487,6 +542,7 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
                           final publicacionId = publicacion['id'] as String?;
                           final nombreAutor =
                               item.nombreAutor; // Quién compartió en comunidad
+                          final avatarUrl = item.avatarUrl; // Foto de perfil del autor
                           final nombreRutaCompartida =
                               item.nombreRutaCompartida;
                           final idRutaCompartida = item.idRutaCompartida;
@@ -531,7 +587,12 @@ class _ComunidadScreenState extends State<ComunidadScreen> {
                                             Theme.of(
                                               context,
                                             ).colorScheme.secondaryContainer,
-                                        child: const Icon(Icons.person_outline),
+                                        backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+                                            ? NetworkImage(avatarUrl)
+                                            : null,
+                                        child: avatarUrl == null || avatarUrl.isEmpty
+                                            ? const Icon(Icons.person_outline)
+                                            : null,
                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(
