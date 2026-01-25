@@ -252,9 +252,15 @@ class LocationTrackingService {
         },
       );
 
-      // Enviar ubicación inicial inmediatamente
-      final posicionInicial = await obtenerUbicacionActual();
-      await _actualizarUbicacionEnServidor(posicionInicial);
+      // OPTIMIZACIÓN: Intentar obtener última ubicación conocida primero (instantáneo)
+      // En lugar de esperar 10-30s por GPS frío con getCurrentPosition()
+      final ultimaUbicacion = await obtenerUltimaUbicacionConocida();
+      if (ultimaUbicacion != null) {
+        // Usar última conocida inmediatamente
+        _ultimaPosicion = ultimaUbicacion;
+        await _actualizarUbicacionEnServidor(ultimaUbicacion);
+      }
+      // No esperar por getCurrentPosition() - el stream lo hará en background
     } catch (e) {
       _trackingActivo = false;
       throw Exception('Error al iniciar tracking: ${e.toString()}');

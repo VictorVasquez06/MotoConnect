@@ -173,7 +173,12 @@ class _GruposScreenState extends State<GruposScreen> {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: Theme.of(context).primaryColor,
-          child: const Icon(Icons.groups, color: Colors.white),
+          backgroundImage: grupo.fotoUrl != null
+              ? NetworkImage(grupo.fotoUrl!)
+              : null,
+          child: grupo.fotoUrl == null
+              ? const Icon(Icons.groups, color: Colors.white)
+              : null,
         ),
         title: Text(
           grupo.nombre,

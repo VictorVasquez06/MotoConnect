@@ -27,6 +27,9 @@ class GrupoRutaModel {
   /// Indica si el grupo está activo
   final bool activo;
 
+  /// URL de la foto del grupo (opcional)
+  final String? fotoUrl;
+
   /// Fecha de creación
   final DateTime createdAt;
 
@@ -41,6 +44,7 @@ class GrupoRutaModel {
     required this.codigoInvitacion,
     required this.creadoPor,
     this.activo = true,
+    this.fotoUrl,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -54,6 +58,7 @@ class GrupoRutaModel {
       codigoInvitacion: json['codigo_invitacion'] as String,
       creadoPor: json['creado_por'] as String,
       activo: json['activo'] as bool? ?? true,
+      fotoUrl: json['foto_url'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -68,6 +73,7 @@ class GrupoRutaModel {
       'codigo_invitacion': codigoInvitacion,
       'creado_por': creadoPor,
       'activo': activo,
+      'foto_url': fotoUrl,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -81,6 +87,7 @@ class GrupoRutaModel {
     String? codigoInvitacion,
     String? creadoPor,
     bool? activo,
+    String? fotoUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -91,6 +98,7 @@ class GrupoRutaModel {
       codigoInvitacion: codigoInvitacion ?? this.codigoInvitacion,
       creadoPor: creadoPor ?? this.creadoPor,
       activo: activo ?? this.activo,
+      fotoUrl: fotoUrl ?? this.fotoUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

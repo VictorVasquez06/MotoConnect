@@ -1,0 +1,233 @@
+Launching lib\main.dart on sdk gphone64 x86 64 in debug mode...
+√ Built build\app\outputs\flutter-apk\app-debug.apk
+D/FlutterJNI(13941): Beginning load of flutter...
+D/FlutterJNI(13941): flutter (null) was loaded normally!
+I/flutter (13941): [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+D/com.llfbandit.app_links(13941): Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] flg=0x30000000 xflg=0x4 cmp=com.example.motoconnect/.MainActivity (has extras) }
+I/ple.motoconnect(13941): AssetManager2(0x722d0a74a198) locale list changing from [] to [en-US]
+I/TextToSpeech(13941): Sucessfully bound to com.google.android.tts
+D/FlutterGeolocator(13941): Attaching Geolocator to activity
+Connecting to VM Service at ws://127.0.0.1:57160/wqFN7B_yW7g=/ws
+Connected to the VM Service.
+I/ple.motoconnect(13941): hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityNodeInfo;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported,test-api) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app) using reflection: allowed
+I/ple.motoconnect(13941): hiddenapi: Accessing hidden method Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app) using reflection: allowed
+I/ple.motoconnect(13941): hiddenapi: Accessing hidden field Landroid/view/accessibility/AccessibilityNodeInfo;->mChildNodeIds:Landroid/util/LongArray; (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app) using reflection: allowed
+I/ple.motoconnect(13941): hiddenapi: Accessing hidden method Landroid/util/LongArray;->get(I)J (runtime_flags=0, domain=platform, api=unsupported) from Lio/flutter/view/AccessibilityViewEmbedder$ReflectionAccessors; (domain=app) using reflection: allowed
+D/CompatChangeReporter(13941): Compat change id reported: 377864165; UID 10217; state: ENABLED
+W/HWUI    (13941): Unknown dataspace 0
+D/FlutterGeolocator(13941): Creating service.
+D/FlutterGeolocator(13941): Binding to location service.
+I/WindowExtensionsImpl(13941): Initializing Window Extensions, vendor API level=9, activity embedding enabled=true
+I/ple.motoconnect(13941): Compiler allocated 5042KB to compile void android.view.ViewRootImpl.performTraversals()
+D/FlutterGeolocator(13941): Geolocator foreground service connected
+D/FlutterGeolocator(13941): Initializing Geolocator services
+D/FlutterGeolocator(13941): Flutter engine connected. Connected engine count 1
+I/Choreographer(13941): Skipped 94 frames!  The application may be doing too much work on its main thread.
+D/WindowLayoutComponentImpl(13941): Register WindowLayoutInfoListener on Context=com.example.motoconnect.MainActivity@f279b1a, of which baseContext=android.app.ContextImpl@db2ced4
+D/ProfileInstaller(13941): Installing profile for com.example.motoconnect
+I/TextToSpeech(13941): Connected to TTS engine
+I/TextToSpeech(13941): Setting up the connection to TTS engine...
+I/flutter (13941): supabase.supabase_flutter: INFO: ***** Supabase init completed ***** 
+I/Choreographer(13941): Skipped 76 frames!  The application may be doing too much work on its main thread.
+D/InsetsController(13941): hide(ime(), fromIme=false)
+I/ImeTracker(13941): com.example.motoconnect:40b21cd9: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+W/WindowOnBackDispatcher(13941): sendCancelIfRunning: isInProgress=false callback=io.flutter.embedding.android.FlutterActivity$1@3ea1b58
+D/MapsInitializer(13941): preferredRenderer: null
+D/zzcc    (13941): preferredRenderer: null
+I/zzcc    (13941): Making Creator dynamically
+W/ple.motoconnect(13941): ClassLoaderContext classpath size mismatch. expected=1, found=0 (DLC[];PCL[base.apk*2595771515]{PCL[/system/framework/org.apache.http.legacy.jar*4247870504]#PCL[/system/framework/com.android.media.remotedisplay.jar*487574312]#PCL[/system/framework/com.android.location.provider.jar*1570284764]#PCL[/system_ext/framework/androidx.window.extensions.jar*1030441313]#PCL[/system_ext/framework/androidx.window.sidecar.jar*3860983653]} | DLC[];PCL[])
+I/DynamiteModule(13941): Considering local module com.google.android.gms.maps_core_dynamite:0 and remote module com.google.android.gms.maps_core_dynamite:254515602
+I/DynamiteModule(13941): Selected remote version of com.google.android.gms.maps_core_dynamite, version >= 254515602
+V/DynamiteModule(13941): Dynamite loader version >= 2, using loadModule2NoCrashUtils
+W/System  (13941): ClassLoader referenced unknown path: 
+D/nativeloader(13941): Configuring clns-10 for other apk . target_sdk_version=36, uses_libraries=, library_path=/data/app/~~0V9Khw7ubjpWQ99ca5Ouyw==/com.google.android.gms-MbleigvsIdYVWPchJmTqiw==/lib/x86_64:/data/app/~~0V9Khw7ubjpWQ99ca5Ouyw==/com.google.android.gms-MbleigvsIdYVWPchJmTqiw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.gms
+I/ple.motoconnect(13941): AssetManager2(0x722d0a7798f8) locale list changing from [] to [en-US]
+I/ple.motoconnect(13941): AssetManager2(0x722d0a780978) locale list changing from [] to [en-US]
+I/ple.motoconnect(13941): AssetManager2(0x722d0a782598) locale list changing from [] to [en-US]
+I/ple.motoconnect(13941): hiddenapi: Accessing hidden method Ldalvik/system/VMStack;->getStackClass2()Ljava/lang/Class; (runtime_flags=0, domain=core-platform, api=unsupported) from Lm140/gwg; (domain=app) using reflection: allowed
+W/NativeHelper(13941): Loading native library 'gmm-jni' on thread main
+D/nativeloader(13941): Configuring clns-11 for other apk . target_sdk_version=36, uses_libraries=ALL, library_path=/data/app/~~0V9Khw7ubjpWQ99ca5Ouyw==/com.google.android.gms-MbleigvsIdYVWPchJmTqiw==/split_maps_core_dynamite_ondemand.apk!/lib/x86_64:/data/app/~~0V9Khw7ubjpWQ99ca5Ouyw==/com.google.android.gms-MbleigvsIdYVWPchJmTqiw==/split_maps_core_dynamite_ondemand.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand
+D/nativeloader(13941): Load /data/app/~~0V9Khw7ubjpWQ99ca5Ouyw==/com.google.android.gms-MbleigvsIdYVWPchJmTqiw==/split_maps_core_dynamite_ondemand.apk!/lib/x86_64/libgmm-jni.so using isolated ns clns-11 (caller=/data/app/~~0V9Khw7ubjpWQ99ca5Ouyw==/com.google.android.gms-MbleigvsIdYVWPchJmTqiw==/split_maps_core_dynamite_ondemand.apk): ok
+I/native  (13941): I0000 00:00:1768692815.640014   13941 jni_init.cc:30] Initializing JNI...
+I/NativeHelper(13941): JNI initialized.
+I/Google Android Maps SDK(13941): Google Play services client version: 18020000
+D/bo      (13941): SDK type: 1, version: 254515602
+D/hp      (13941): maps_core_dynamite module version in use (0 represents standalone library): 254515602
+D/hp      (13941): Added event: 109
+D/hp      (13941): Added event: 112
+D/MapsInitializer(13941): loadedRenderer: LATEST
+D/zzcc    (13941): preferredRenderer: null
+D/bo      (13941): SDK type: 1, version: 254515602
+I/Google Android Maps SDK(13941): Google Play services package version: 255034038
+I/Google Android Maps SDK(13941): Google Play services maps renderer version(maps_core): 254515602
+D/bo      (13941): SDK type: 1, version: 254515602
+D/de      (13941): about to start loading native library asynchronously
+W/y       (13941): Suppressed StrictMode policy violation: StrictModeDiskReadViolation
+I/o       (13941): Using GMM server: https://clients4.google.com/glm/mmap
+W/y       (13941): Suppressed StrictMode policy violation: StrictModeDiskReadViolation
+W/y       (13941): Suppressed StrictMode policy violation: StrictModeDiskWriteViolation
+D/o       (13941): Using Non-null serverVersionMetadataManager to load previous metadata.
+D/o       (13941): Previous session server version metadata loaded: CggIBhDspqPLBgoICAMQ8uCmywYKCggEEOHSossGGAEKCAgBEMDi+coG
+W/y       (13941): Suppressed StrictMode policy violation: StrictModeDiskReadViolation
+D/DataRequestDispatcher(13941): Included server version metadata in dimens
+W/HWUI    (13941): Image decoding logging dropped!
+I/m140.box(13941): getExecutor  CREATED  bon@3e6974d[main]
+I/m140.box(13941): getExecutor  CREATED  ScheduledThreadPoolExecutor@c2ad50[Scheduler]
+I/m140.box(13941): getExecutor  CREATED  boq@f925b49[Lite]
+I/m140.box(13941): getExecutor  CREATED  boq@7ff716f[Background]
+I/m140.box(13941): getExecutor  CREATED  boq@65ef114[Blocking]
+I/m140.cah(13941): marker files=[]
+I/m140.box(13941): getExecutor  CREATED  boq@69177b[TilePrep]
+I/m140.bna(13941): Loaded cached client parameters
+I/ClientParamsBlocking(13941): ClientParametersBlockingReference.blockedOnMainThread: ENABLE_FEATURES for 57 ms.
+I/ClientParamsBlocking(13941): java.lang.Throwable
+I/ClientParamsBlocking(13941): 	at m140.bgt.m(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:179)
+I/ClientParamsBlocking(13941): 	at m140.bgt.a(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:1)
+I/ClientParamsBlocking(13941): 	at m140.ben.a(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:3)
+I/ClientParamsBlocking(13941): 	at m140.big.b(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:9)
+I/ClientParamsBlocking(13941): 	at m140.ebh.a(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:147)
+I/ClientParamsBlocking(13941): 	at m140.jic.d(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:12)
+I/ClientParamsBlocking(13941): 	at m140.jic.a(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:7)
+I/ClientParamsBlocking(13941): 	at m140.dzb.<init>(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:43)
+I/ClientParamsBlocking(13941): 	at m140.dzc.a(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:72)
+I/ClientParamsBlocking(13941): 	at m140.jic.d(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:12)
+I/ClientParamsBlocking(13941): 	at m140.jic.a(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:7)
+I/ClientParamsBlocking(13941): 	at com.google.maps.api.android.lib6.phoenix.bg.a(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:5)
+I/ClientParamsBlocking(13941): 	at m140.jic.d(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:12)
+I/ClientParamsBlocking(13941): 	at m140.jic.a(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:7)
+I/ClientParamsBlocking(13941): 	at com.google.maps.api.android.lib6.phoenix.be.a(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:3)
+I/ClientParamsBlocking(13941): 	at m140.jic.d(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:12)
+I/ClientParamsBlocking(13941): 	at m140.jic.a(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:7)
+I/ClientParamsBlocking(13941): 	at com.google.maps.api.android.lib6.phoenix.bj.a(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:3)
+I/ClientParamsBlocking(13941): 	at m140.jic.d(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:12)
+I/ClientParamsBlocking(13941): 	at m140.jic.a(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:7)
+I/ClientParamsBlocking(13941): 	at com.google.maps.api.android.lib6.impl.cg.aY(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:67)
+I/ClientParamsBlocking(13941): 	at com.google.maps.api.android.lib6.impl.em.d(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:12)
+I/ClientParamsBlocking(13941): 	at com.google.android.gms.maps.internal.r.bt(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:158)
+I/ClientParamsBlocking(13941): 	at m140.ayi.onTransact(:com.google.android.gms.policy_maps_core_dynamite@254515607@254515602032.843324832.843324832:21)
+I/ClientParamsBlocking(13941): 	at android.os.Binder.transact(Binder.java:1273)
+I/ClientParamsBlocking(13941): 	at com.google.android.gms.internal.maps.zza.zzc(com.google.android.gms:play-services-maps@@18.2.0:2)
+I/ClientParamsBlocking(13941): 	at com.google.android.gms.maps.internal.zzl.onCreate(com.google.android.gms:play-services-maps@@18.2.0:3)
+I/ClientParamsBlocking(13941): 	at com.google.android.gms.maps.zzah.onCreate(com.google.android.gms:play-services-maps@@18.2.0:3)
+I/ClientParamsBlocking(13941): 	at com.google.android.gms.dynamic.zac.zab(com.google.android.gms:play-services-base@@18.3.0:1)
+I/ClientParamsBlocking(13941): 	at com.google.android.gms.dynamic.zaa.onDelegateCreated(com.google.android.gms:play-services-base@@18.3.0:3)
+I/ClientParamsBlocking(13941): 	at com.google.android.gms.maps.zzai.zzb(com.google.android.gms:play-services-maps@@18.2.0:5)
+I/ClientParamsBlocking(13941): 	at com.google.android.gms.maps.zzai.createDelegate(com.google.android.gms:play-services-maps@@18.2.0:1)
+I/ClientParamsBlocking(13941): 	at com.google.android.gms.dynamic.DeferredLifecycleHelper.zaf(com.google.android.gms:play-services-base@@18.3.0:6)
+I/ClientParamsBlocking(13941): 	at com.google.android.gms.dynamic.DeferredLifecycleHelper.onCreate(com.google.android.gms:play-services-base@@18.3.0:1)
+I/ClientParamsBlocking(13941): 	at com.google.android.gms.maps.MapView.onCreate(com.google.android.gms:play-services-maps@@18.2.0:4)
+I/ClientParamsBlocking(13941): 	at io.flutter.plugins.googlemaps.GoogleMapController.onCreate(GoogleMapController.java:462)
+I/ClientParamsBlocking(13941): 	at androidx.lifecycle.DefaultLifecycleObserverAdapter.onStateChanged(DefaultLifecycleObserverAdapter.kt:24)
+I/ClientParamsBlocking(13941): 	at androidx.lifecycle.LifecycleRegistry$ObserverWithState.dispatchEvent(LifecycleRegistry.kt:322)
+I/ClientParamsBlocking(13941): 	at androidx.lifecycle.LifecycleRegistry.addObserver(LifecycleRegistry.kt:199)
+I/ClientParamsBlocking(13941): 	at io.flutter.plugins.googlemaps.GoogleMapController.init(GoogleMapController.java:193)
+I/ClientParamsBlocking(13941): 	at io.flutter.plugins.googlemaps.GoogleMapBuilder.build(GoogleMapBuilder.java:43)
+I/ClientParamsBlocking(13941): 	at io.flutter.plugins.googlemaps.GoogleMapFactory.create(GoogleMapFactory.java:56)
+I/ClientParamsBlocking(13941): 	at io.flutter.plugin.platform.PlatformViewsController.createPlatformView(PlatformViewsController.java:530)
+I/ClientParamsBlocking(13941): 	at io.flutter.plugin.platform.PlatformViewsController$1.createForTextureLayer(PlatformViewsController.java:202)
+I/ClientParamsBlocking(13941): 	at io.flutter.embedding.engine.systemchannels.PlatformViewsChannel$1.create(PlatformViewsChannel.java:128)
+I/ClientParamsBlocking(13941): 	at io.flutter.embedding.engine.systemchannels.PlatformViewsChannel$1.onMethodCall(PlatformViewsChannel.java:55)
+I/ClientParamsBlocking(13941): 	at io.flutter.plugin.common.MethodChannel$IncomingMethodCallHandler.onMessage(MethodChannel.java:267)
+I/ClientParamsBlocking(13941): 	at io.flutter.embedding.engine.dart.DartMessenger.invokeHandler(DartMessenger.java:292)
+I/ClientParamsBlocking(13941): 	at io.flutter.embedding.engine.dart.DartMessenger.lambda$dispatchMessageToQueue$0$io-flutter-embedding-engine-dart-DartMessenger(DartMessenger.java:319)
+I/ClientParamsBlocking(13941): 	at io.flutter.embedding.engine.dart.DartMessenger$$ExternalSyntheticLambda0.run(D8$$SyntheticClass:0)
+I/ClientParamsBlocking(13941): 	at android.os.Handler.handleCallback(Handler.java:995)
+I/ClientParamsBlocking(13941): 	at android.os.Handler.dispatchMessage(Handler.java:103)
+I/ClientParamsBlocking(13941): 	at android.os.Looper.loopOnce(Looper.java:248)
+I/ClientParamsBlocking(13941): 	at android.os.Looper.loop(Looper.java:338)
+I/ClientParamsBlocking(13941): 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+I/ClientParamsBlocking(13941): 	at java.lang.reflect.Method.invoke(Native Method)
+I/ClientParamsBlocking(13941): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+I/ClientParamsBlocking(13941): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+I/m140.bnn(13941): finishInitialization ClientParametersManager.
+I/m140.bml(13941): start()  account=Account {name=signedout@, type=com.google.android.apps.maps}  locale=en_US
+I/m140.bml(13941): P/H: Scheduling next update in 20523.834000 seconds: initial refresh (forced by: NOT FORCED)
+I/m140.cek(13941): FpsProfiler MAIN created on main
+I/m140.box(13941): getExecutor  CREATED  boq@94004cb[Picker]
+I/m140.epd(13941): Found 47 zoom mappings
+I/m140.epd(13941): Zoom tables loaded
+W/m140.ffb(13941): No current context - attempting to create off-screen context
+I/m140.ffb(13941): Created GlConstants: ffa{gpuVendor=Google (NVIDIA Corporation), glVersion=OpenGL ES 3.1 (4.5.0 NVIDIA 591.44), glRenderer=Android Emulator OpenGL ES Translator (NVIDIA GeForce RTX 2050/PCIe/SSE2), maxTextureSize=32768, maxVertexTextureImageUnits=32, maxVertexUniformVectors=1024, maxSupportedLineWidth=10, maxVertexAttribs=16, nonPowerOfTwoTextureSupport=FULL}
+I/m140.dvj(13941): Map using legacy labeler
+I/m140.ewn(13941): Create or open database: /storage/emulated/0/Android/data/com.example.motoconnect/cache/diskcache; secure file path: /data/user/0/com.example.motoconnect/app_/testdata
+I/m140.duc(13941): Network fetching: false
+I/m140.euz(13941): Current epoch is now 762
+I/m140.duc(13941): requestDrawingConfig for epoch 762 legend ROADMAP
+E/m140.exi(13941): referer is null for url=https://www.google.com/maps/vt/sxforms?v=acd52998c1744276484d99778331458a
+I/m140.box(13941): getExecutor  CREATED  boq@ff4973[Network]
+W/GMM-SatelliteConnectivity(13941): WIFI  isActiveNetworkSatellite: false
+I/m140.box(13941): getExecutor  CREATED  boq@e491b3a[LocFresh]
+E/m140.exi(13941): referer is null for url=https://www.gstatic.com/maps/res/CompactLegend-Roadmap-EnhancedNavStyleHoldbackForGeoD-acd52998c1744276484d99778331458a
+I/m140.fiz(13941): Model SDK_GPHONE64_X86_64, Product name SDK_GPHONE64_X86_64, Board name GOLDFISH_X86_64, Manufacturer GOOGLE
+W/m140.fiz(13941): Model is not recognized, and therefore using default settings.
+I/m140.ewr(13941): Database cache size: 57344 bytes
+I/m140.duc(13941): Network fetching: true
+I/m140.ewr(13941): Deleted 0 entries from the disk cache in 5 ms
+I/m140.ewr(13941): Deleting expired tiles and resources took 5 ms
+I/m140.epd(13941): Found 47 zoom mappings
+I/m140.epd(13941): Zoom tables loaded
+I/m140.duc(13941): requestDrawingConfig for epoch 762 legend ROADMAP
+W/JavaCronetEngine(13941): using the fallback Cronet Engine implementation. Performance will suffer and many HTTP client features, including caching, will not work.
+I/m140.byw(13941): Using Paint server URL: https://www.google.com/maps/vt
+5
+W/m140.etp(13941): GMM_VECTOR_BASE - Network fetching should be not allowed.
+W/HWUI    (13941): Image decoding logging dropped!
+2
+W/m140.etp(13941): GMM_VECTOR_BASE - Network fetching should be not allowed.
+I/m140.byj(13941): PaintParametersListeningServerChannelManager got a client parameters update event.
+I/m140.btv(13941): Updating the server URL. Old URL: https://www.google.com/maps/vt New URL: https://www.google.com/maps/vt
+I/m140.btv(13941): Creating a new server channel with URL: https://www.google.com/maps/vt, server channel factory class: class m140.bts
+W/m140.etp(13941): GMM_VECTOR_BASE - Network fetching should be not allowed.
+6
+W/HWUI    (13941): Image decoding logging dropped!
+I/m140.duc(13941): requestDrawingConfig for epoch 762 legend ROADMAP
+I/PlatformViewsController(13941): Hosting view in view hierarchy for platform view: 0
+I/PlatformViewsController(13941): PlatformView is using SurfaceProducer backend
+I/m140.duc(13941): requestDrawingConfig for epoch 762 legend ROADMAP
+I/GoogleMapController(13941): Installing custom TextureView driven invalidator.
+E/GoogleMapController(13941): Cannot enable MyLocation layer as location permissions are not granted
+4
+W/m140.etp(13941): GMM_VECTOR_BASE - Network fetching should be not allowed.
+I/flutter (13941): 📥 Cargando participantes iniciales...
+I/flutter (13941): ✅ 2 participantes cargados
+I/flutter (13941): 🎨 Pre-generando marcadores para 2 participantes...
+I/flutter (13941): 📝 Sin foto para Víctor Vasquez, usando iniciales
+I/flutter (13941): 📝 Dibujando iniciales "VV" para Víctor Vasquez
+I/flutter (13941): 📝 Sin foto para Víctor Vasquez, usando iniciales
+I/flutter (13941): 📝 Dibujando iniciales "VV" para Víctor Vasquez
+2
+I/flutter (13941):  Cargando foto para Patoxkix: https://otxzwutudsruildrtuzy.supabase.co/storage/v1/object/public/avatars/6d31ef26-44ad-4f57-a0d9-336aad0f6e43/avatar.jpg?t=1767585735700
+I/flutter (13941): ✅ Marcador construido para Víctor Vasquez (3381 bytes)
+I/flutter (13941): ✅ Marcador creado y cacheado: Víctor Vasquez
+I/flutter (13941): ✅ Marcador construido para Víctor Vasquez (3605 bytes)
+I/flutter (13941): ✅ Marcador creado y cacheado: Víctor Vasquez
+I/m140.euu(13941): styleTableCache inserted: 762 ROADMAP https://www.gstatic.com/maps/res/CompactLegend-Roadmap-EnhancedNavStyleHoldbackForGeoD-acd52998c1744276484d99778331458a
+I/flutter (13941): ✅ Foto cargada exitosamente para Patoxkix (21589 bytes)
+5
+I/m140.duc(13941): Network fetching: true
+I/flutter (13941): ✅ Marcador construido para Patoxkix (16237 bytes)
+I/flutter (13941): ✅ Marcador creado y cacheado: Patoxkix
+I/m140.caw(13941): Initial labeling completed.
+E/m140.exi(13941): referer is null for url=https://www.gstatic.com/maps/res/CompactLegend-RoadmapDark-EnhancedNavStyleHoldbackForGeoD-acd52998c1744276484d99778331458a
+I/m140.epd(13941): Found 47 zoom mappings
+I/m140.epd(13941): Zoom tables loaded
+I/flutter (13941): ✅ Foto cargada exitosamente para Patoxkix (21589 bytes)
+I/flutter (13941): ✅ Marcador construido para Patoxkix (15956 bytes)
+I/flutter (13941): ✅ Marcador creado y cacheado: Patoxkix
+I/flutter (13941): ✅ Pre-generación completa. Stats: {cache_size: 4, cache_hits: 0, cache_misses: 4, hit_rate: 0.0, retry_queue_size: 0, total_retries: 0, states: {ready: 4, loading: 0, failed: 0, stale: 0}}
+I/flutter (13941): 📡 Suscribiendo a stream de participantes para sesión: 8280cc4c-f6b6-4999-a4fd-91c67185fa5c
+I/flutter (13941): 📡 Suscribiendo a stream de ruta compartida para sesión: 8280cc4c-f6b6-4999-a4fd-91c67185fa5c
+W/DynamiteModule(13941): Local module descriptor class for com.google.android.gms.googlecertificates not found.
+I/DynamiteModule(13941): Considering local module com.google.android.gms.googlecertificates:0 and remote module com.google.android.gms.googlecertificates:7
+I/DynamiteModule(13941): Selected remote version of com.google.android.gms.googlecertificates, version >= 7
+W/ple.motoconnect(13941): ClassLoaderContext classpath element checksum mismatch. expected=2595771515, found=3625775286 (DLC[];PCL[base.apk*2595771515]{PCL[/system/framework/org.apache.http.legacy.jar*4247870504]#PCL[/system/framework/com.android.media.remotedisplay.jar*487574312]#PCL[/system/framework/com.android.location.provider.jar*1570284764]#PCL[/system_ext/framework/androidx.window.extensions.jar*1030441313]#PCL[/system_ext/framework/androidx.window.sidecar.jar*3860983653]} | DLC[];PCL[/data/app/~~LwskYUe9gCf3wtXIuIGx6A==/com.example.motoconnect-ybekarMj6mGB7R3aCWpjug==/base.apk*3625775286]{PCL[/system_ext/framework/androidx.window.extensions.jar*1030441313]#PCL[/system_ext/framework/androidx.window.sidecar.jar*3860983653]#PCL[/system/framework/org.apache.http.legacy.jar*4247870504]})
+I/ple.motoconnect(13941): AssetManager2(0x722d0a78ed98) locale list changing from [] to [en-US]
+I/ple.motoconnect(13941): AssetManager2(0x722d0a7922b8) locale list changing from [] to [en-US]
+I/flutter (13941): 🗺️ Actualizando 1 marcadores...
+I/flutter (13941): 💾 Cache hit (1 hits, 4 misses): Patoxkix
+I/flutter (13941): 📍 Marcador agregado al mapa: Patoxkix en LatLng(7.079095, -73.0973429)
+I/flutter (13941): ✅ 1 marcadores creados, actualizando mapa...
+W/HWUI    (13941): Image decoding logging dropped!
+I/ple.motoconnect(13941): Thread[2,tid=13967,WaitingInMainSignalCatcherLoop,Thread*=0x722bfa732be0,peer=0x2001d50,"Signal Catcher"]: reacting to signal 3
+I/ple.motoconnect(13941): 
+I/ple.motoconnect(13941): Wrote stack traces to tombstoned

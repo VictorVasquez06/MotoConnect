@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/models/grupo_ruta_model.dart';
 import '../../../data/models/miembro_grupo_model.dart';
 import '../../../data/models/sesion_ruta_activa_model.dart';
 import '../../../data/repositories/grupo_repository.dart';
+import 'editar_grupo_screen.dart';
 import 'mapa_compartido_screen.dart';
 
 /// Pantalla de detalle de un grupo
@@ -133,7 +135,7 @@ class _DetalleGrupoScreenState extends State<DetalleGrupoScreen>
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _iniciarSesion,
         icon: const Icon(Icons.play_arrow),
-        label: const Text('Iniciar Ruta'),
+        label: const Text('Iniciar Sesión'),
       ),
     );
   }
@@ -171,6 +173,16 @@ class _DetalleGrupoScreenState extends State<DetalleGrupoScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Foto del grupo (si existe)
+            if (widget.grupo.fotoUrl != null) ...[
+              Center(
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundImage: NetworkImage(widget.grupo.fotoUrl!),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             if (widget.grupo.descripcion != null &&
                 widget.grupo.descripcion!.isNotEmpty) ...[
               Text(
@@ -267,7 +279,7 @@ class _DetalleGrupoScreenState extends State<DetalleGrupoScreen>
             const Text('No hay sesiones activas'),
             const SizedBox(height: 8),
             const Text(
-              'Inicia una ruta para comenzar a compartir ubicaciones',
+              'Inicia una sesión para comenzar a compartir ubicaciones en tiempo real',
               textAlign: TextAlign.center,
             ),
           ],
@@ -289,6 +301,12 @@ class _DetalleGrupoScreenState extends State<DetalleGrupoScreen>
   }
 
   Widget _buildSesionCard(SesionRutaActivaModel sesion) {
+    // Verificar si el usuario actual es el líder de esta sesión o admin del grupo
+    final supabase = Supabase.instance.client;
+    final miUsuarioId = supabase.auth.currentUser?.id;
+    final esLiderDeSesion = sesion.iniciadaPor == miUsuarioId;
+    final puedeFinalizarSesion = esLiderDeSesion || _esAdmin;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
@@ -318,9 +336,26 @@ class _DetalleGrupoScreenState extends State<DetalleGrupoScreen>
               ),
           ],
         ),
-        trailing: Icon(
-          sesion.estaActiva ? Icons.arrow_forward_ios : Icons.history,
-          size: 16,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Botón de finalizar sesión (solo líder o admin)
+            if (puedeFinalizarSesion && sesion.estaActiva)
+              IconButton(
+                icon: const Icon(Icons.stop_circle, color: Colors.red),
+                onPressed: () => _finalizarSesionDesdeLista(sesion),
+                tooltip: 'Finalizar sesión',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            if (puedeFinalizarSesion && sesion.estaActiva)
+              const SizedBox(width: 8),
+            // Flecha para abrir
+            Icon(
+              sesion.estaActiva ? Icons.arrow_forward_ios : Icons.history,
+              size: 16,
+            ),
+          ],
         ),
         onTap: () => _abrirMapaCompartido(sesion),
       ),
@@ -363,7 +398,7 @@ class _DetalleGrupoScreenState extends State<DetalleGrupoScreen>
     final resultado = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Iniciar Ruta'),
+        title: const Text('Iniciar Sesión'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -371,7 +406,7 @@ class _DetalleGrupoScreenState extends State<DetalleGrupoScreen>
               TextField(
                 controller: nombreController,
                 decoration: const InputDecoration(
-                  labelText: 'Nombre de la ruta *',
+                  labelText: 'Nombre de la sesión *',
                   hintText: 'Ej: Ruta al Volcán',
                 ),
               ),
@@ -422,12 +457,48 @@ class _DetalleGrupoScreenState extends State<DetalleGrupoScreen>
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error al iniciar sesión: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          final errorMsg = e.toString();
+
+          // Detectar si el error es por sesión activa existente
+          if (errorMsg.contains('Ya tienes una sesión activa')) {
+            // Mostrar diálogo con opción de ir a la sesión existente
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Sesión Activa Existente'),
+                content: Text(
+                  errorMsg.replaceAll('Exception: ', ''),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Entendido'),
+                  ),
+                  FilledButton(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      // Obtener la sesión existente y abrirla
+                      final sesionExistente =
+                          await _grupoRepository.obtenerSesionActivaDelUsuario();
+                      if (sesionExistente != null && mounted) {
+                        _abrirMapaCompartido(sesionExistente);
+                      }
+                    },
+                    child: const Text('Ir a Mi Sesión'),
+                  ),
+                ],
+              ),
+            );
+          } else {
+            // Mostrar error genérico
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error al iniciar sesión: $errorMsg'),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
         }
       }
     }
@@ -459,11 +530,68 @@ class _DetalleGrupoScreenState extends State<DetalleGrupoScreen>
     }
   }
 
-  void _editarGrupo() {
-    // TODO: Implementar edición de grupo
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Función próximamente')),
+  void _editarGrupo() async {
+    final resultado = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditarGrupoScreen(grupo: widget.grupo),
+      ),
     );
+
+    // Si se actualizó, recargar datos del grupo
+    if (resultado == true && mounted) {
+      setState(() {
+        // El widget.grupo se actualizará automáticamente vía stream
+      });
+    }
+  }
+
+  Future<void> _finalizarSesionDesdeLista(SesionRutaActivaModel sesion) async {
+    final confirmacion = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Finalizar Sesión'),
+        content: Text(
+          '¿Estás seguro de que deseas finalizar la sesión "${sesion.nombreSesion}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('CANCELAR'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('FINALIZAR'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmacion == true && mounted) {
+      try {
+        await _grupoRepository.finalizarSesion(sesion.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Sesión finalizada correctamente'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Recargar datos para actualizar la lista
+          _cargarDatos();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error al finalizar sesión: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _eliminarGrupo() async {

@@ -12,7 +12,19 @@
       "Bash(del \"C:\\Users\\VictorVasquez\\Documents\\MotoConnect\\lib\\presentation\\widgets\\location_selector_field.dart\")",
       "Bash(Select-String -Pattern \"error|warning\")",
       "Bash(Select-Object -First 20)",
-      "Bash(Select-String -Pattern \"navigation_panel|navigation_screen|error\" -Context 0,2)"
+      "Bash(Select-String -Pattern \"navigation_panel|navigation_screen|error\" -Context 0,2)",
+      "Bash(Select-String -Pattern \"navigation_voice_service|navigation_summary_dialog|navigation_viewmodel|navigation_screen|error|warning\" -Context 0,2)",
+      "Bash(ls:*)",
+      "Bash(flutter clean:*)",
+      "Bash(./gradlew clean)",
+      "Bash(Select-String -Pattern \"mapa_compartido_screen.dart\" -Context 0,2)",
+      "Bash(if not exist \"scripts\" mkdir scripts)",
+      "Bash(Select-String -Pattern \"grupo_repository|error|warning\" -Context 0,2)",
+      "Bash(echo \"Instrucciones para ver logs filtrados:\n\nEn Android Studio / VS Code con Flutter ejecuta:\n\nflutter logs | grep -E ''DEBUG|Usuario|nombreMostrar|Participantes''\n\nO si estás en Windows PowerShell:\n\nflutter logs | Select-String -Pattern ''DEBUG|Usuario|nombreMostrar|Participantes''\n\nEsto mostrará solo los logs relevantes de la app.\")",
+      "Bash(Select-String -Pattern \"mapa_compartido_screen|marker_state_manager|error|warning\" -Context 0,2)",
+      "Bash(Select-String -Pattern \"error|warning\" -Context 0,2)",
+      "Bash(Select-String -Pattern \"mapa_compartido_screen|error|warning\" -Context 0,2)",
+      "Bash(powershell -Command \"(Get-Content SOLUCION_DEBUG_BLOQUEADO.md -Raw).Length\")"
     ],
     "deny": [],
     "ask": []

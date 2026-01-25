@@ -12,12 +12,17 @@
 /// - Gestión de ubicaciones en tiempo real
 library;
 
+import 'dart:io';
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as path;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/grupo_ruta_model.dart';
 import '../models/miembro_grupo_model.dart';
 import '../models/sesion_ruta_activa_model.dart';
 import '../models/ubicacion_tiempo_real_model.dart';
-import 'dart:math';
+import '../models/participante_sesion_model.dart';
 
 class GrupoRepository {
   // ========================================
@@ -171,18 +176,58 @@ class GrupoRepository {
     String? nombre,
     String? descripcion,
     bool? activo,
+    String? fotoUrl,
   }) async {
     try {
       final updates = <String, dynamic>{};
       if (nombre != null) updates['nombre'] = nombre;
       if (descripcion != null) updates['descripcion'] = descripcion;
       if (activo != null) updates['activo'] = activo;
+      if (fotoUrl != null) updates['foto_url'] = fotoUrl;
 
-      if (updates.isEmpty) return;
+      if (updates.isEmpty) {
+        throw Exception('No se proporcionaron campos para actualizar');
+      }
 
       await _supabase.from('grupos_ruta').update(updates).eq('id', grupoId);
+
+      debugPrint('✅ Grupo actualizado: $updates');
     } catch (e) {
+      debugPrint('❌ Error al actualizar grupo: $e');
       throw Exception('Error al actualizar grupo: ${e.toString()}');
+    }
+  }
+
+  /// Sube una foto de grupo a Supabase Storage
+  ///
+  /// [grupoId] - ID del grupo
+  /// [imagePath] - Ruta local de la imagen
+  /// Retorna la URL pública de la imagen
+  Future<String> subirFotoGrupo({
+    required String grupoId,
+    required String imagePath,
+  }) async {
+    try {
+      debugPrint('📤 Subiendo foto de grupo: $grupoId');
+
+      final file = File(imagePath);
+      final bytes = await file.readAsBytes();
+      final extension = path.extension(imagePath);
+      final fileName = '${grupoId}_${DateTime.now().millisecondsSinceEpoch}$extension';
+
+      debugPrint('   Archivo: $fileName (${bytes.length} bytes)');
+
+      // Subir a bucket 'grupos'
+      await _supabase.storage.from('grupos').uploadBinary(fileName, bytes);
+
+      // Obtener URL pública
+      final url = _supabase.storage.from('grupos').getPublicUrl(fileName);
+
+      debugPrint('✅ Foto de grupo subida: $url');
+      return url;
+    } catch (e) {
+      debugPrint('❌ Error al subir foto de grupo: $e');
+      throw Exception('Error al subir foto: ${e.toString()}');
     }
   }
 
@@ -369,6 +414,16 @@ class GrupoRepository {
         throw Exception('Usuario no autenticado');
       }
 
+      // VALIDACIÓN: Verificar si el usuario ya tiene una sesión activa
+      final sesionExistente = await obtenerSesionActivaDelUsuario();
+      if (sesionExistente != null) {
+        throw Exception(
+          'Ya tienes una sesión activa: "${sesionExistente.nombreSesion}". '
+          'Por favor finalízala antes de crear una nueva.',
+        );
+      }
+
+      // Crear sesión
       final response = await _supabase.from('sesiones_ruta_activa').insert({
         'grupo_id': grupoId,
         'ruta_id': rutaId,
@@ -378,7 +433,24 @@ class GrupoRepository {
         'iniciada_por': userId,
       }).select().single();
 
-      return SesionRutaActivaModel.fromJson(response);
+      final sesion = SesionRutaActivaModel.fromJson(response);
+
+      // IMPORTANTE: Asegurar que el líder esté registrado como participante auto-aprobado
+      // Usar upsert para evitar error de clave duplicada si ya existe
+      // (puede existir por trigger de base de datos o lógica previa)
+      await _supabase.from('participantes_sesion').upsert(
+        {
+          'sesion_id': sesion.id,
+          'usuario_id': userId,
+          'estado_aprobacion': 'aprobado',
+          'fecha_aprobacion': DateTime.now().toIso8601String(),
+          'aprobado_por': userId, // El líder se auto-aprueba
+          'tracking_activo': true,
+        },
+        onConflict: 'sesion_id,usuario_id',
+      );
+
+      return sesion;
     } catch (e) {
       throw Exception('Error al iniciar sesión: ${e.toString()}');
     }
@@ -406,6 +478,30 @@ class GrupoRepository {
           .toList();
     } catch (e) {
       return [];
+    }
+  }
+
+  /// Verifica si el usuario actual tiene sesiones activas como líder
+  ///
+  /// Retorna:
+  /// - SesionRutaActivaModel si tiene una sesión activa, null si no tiene
+  Future<SesionRutaActivaModel?> obtenerSesionActivaDelUsuario() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return null;
+
+      final response = await _supabase
+          .from('sesiones_ruta_activa')
+          .select()
+          .eq('iniciada_por', userId)
+          .eq('estado', 'activa')
+          .maybeSingle();
+
+      if (response == null) return null;
+
+      return SesionRutaActivaModel.fromJson(response);
+    } catch (e) {
+      return null;
     }
   }
 
@@ -464,6 +560,27 @@ class GrupoRepository {
       sesionId: sesionId,
       estado: EstadoSesion.finalizada,
     );
+  }
+
+  /// Stream del estado de una sesión en tiempo real
+  ///
+  /// Emite cada vez que cambia el estado de la sesión (activa → finalizada)
+  /// Retorna null si la sesión fue eliminada
+  Stream<SesionRutaActivaModel?> streamEstadoSesion(String sesionId) {
+    debugPrint('📡 Creando stream de estado para sesión: $sesionId');
+    return _supabase
+        .from('sesiones_ruta_activa')
+        .stream(primaryKey: ['id'])
+        .eq('id', sesionId)
+        .map((data) {
+          if (data.isEmpty) {
+            debugPrint('⚠️ Stream de estado: sesión no encontrada o eliminada');
+            return null;
+          }
+          final sesion = SesionRutaActivaModel.fromJson(data.first);
+          debugPrint('📡 Stream de estado emitió: ${sesion.estado}');
+          return sesion;
+        });
   }
 
   // ========================================
@@ -594,6 +711,369 @@ class GrupoRepository {
               .map((json) => UbicacionTiempoRealModel.fromJson(json))
               .toList();
         });
+  }
+
+  // ========================================
+  // MÉTODOS DE PARTICIPANTES DE SESIÓN
+  // ========================================
+
+  /// Solicitar unirse a una sesión
+  Future<ParticipanteSesionModel> solicitarUnirseASesion({
+    required String sesionId,
+  }) async {
+    final userId = _supabase.auth.currentUser?.id;
+
+    if (userId == null) {
+      throw Exception('Usuario no autenticado');
+    }
+
+    // Verificar si ya existe solicitud
+    final existente = await _supabase
+        .from('participantes_sesion')
+        .select()
+        .eq('sesion_id', sesionId)
+        .eq('usuario_id', userId)
+        .maybeSingle();
+
+    if (existente != null) {
+      return ParticipanteSesionModel.fromJson(existente);
+    }
+
+    // Crear nueva solicitud
+    final response = await _supabase
+        .from('participantes_sesion')
+        .insert({
+          'sesion_id': sesionId,
+          'usuario_id': userId,
+          'estado_aprobacion': 'pendiente',
+        })
+        .select()
+        .single();
+
+    return ParticipanteSesionModel.fromJson(response);
+  }
+
+  /// Obtener participantes de una sesión
+  Future<List<ParticipanteSesionModel>> obtenerParticipantes(
+    String sesionId,
+  ) async {
+    final response = await _supabase
+        .from('vista_participantes_sesion')
+        .select()
+        .eq('sesion_id', sesionId)
+        .order('fecha_solicitud');
+
+    return (response as List)
+        .map((json) => ParticipanteSesionModel.fromJson(json))
+        .toList();
+  }
+
+  /// Obtener solo participantes aprobados
+  Future<List<ParticipanteSesionModel>> obtenerParticipantesAprobados(
+    String sesionId,
+  ) async {
+    final response = await _supabase
+        .from('vista_participantes_sesion')
+        .select()
+        .eq('sesion_id', sesionId)
+        .eq('estado_aprobacion', 'aprobado')
+        .order('fecha_aprobacion');
+
+    return (response as List)
+        .map((json) => ParticipanteSesionModel.fromJson(json))
+        .toList();
+  }
+
+  /// Obtener solicitudes pendientes
+  Future<List<ParticipanteSesionModel>> obtenerSolicitudesPendientes(
+    String sesionId,
+  ) async {
+    // Obtener participantes pendientes desde tabla base
+    final participantesData = await _supabase
+        .from('participantes_sesion')
+        .select()
+        .eq('sesion_id', sesionId)
+        .eq('estado_aprobacion', 'pendiente')
+        .order('fecha_solicitud');
+
+    if ((participantesData as List).isEmpty) {
+      return [];
+    }
+
+    // Obtener IDs únicos de usuarios
+    final userIds = participantesData
+        .map((p) => p['usuario_id'] as String)
+        .toSet()
+        .toList();
+
+    // Fetch datos de usuarios en una sola query (batch)
+    final usuarios = await _supabase
+        .from('usuarios')
+        .select('id, nombre, apodo, foto_perfil_url, color_mapa')
+        .inFilter('id', userIds);
+
+    debugPrint('🔍 DEBUG Solicitudes Pendientes:');
+    debugPrint('   - Participantes pendientes: ${participantesData.length}');
+    debugPrint('   - Usuarios obtenidos: ${(usuarios as List).length}');
+    debugPrint('   - Datos usuarios: $usuarios');
+
+    // Crear map para lookup O(1)
+    final usuariosMap = <String, dynamic>{
+      for (final u in usuarios) u['id']: u
+    };
+
+    // Combinar datos
+    return participantesData.map((p) {
+      final usuario = usuariosMap[p['usuario_id']] ?? {};
+      debugPrint('   - Usuario ${p['usuario_id']}: nombre=${usuario['nombre']}, apodo=${usuario['apodo']}');
+      return ParticipanteSesionModel.fromJson({
+        ...p,
+        'nombre': usuario['nombre'],
+        'apodo': usuario['apodo'],
+        'foto_perfil_url': usuario['foto_perfil_url'],
+        'color_mapa': usuario['color_mapa'],
+      });
+    }).toList();
+  }
+
+  /// Aprobar participante
+  Future<ParticipanteSesionModel> aprobarParticipante({
+    required String participanteId,
+  }) async {
+    final userId = _supabase.auth.currentUser?.id;
+
+    await _supabase
+        .from('participantes_sesion')
+        .update({
+          'estado_aprobacion': 'aprobado',
+          'fecha_aprobacion': DateTime.now().toIso8601String(),
+          'aprobado_por': userId,
+        })
+        .eq('id', participanteId);
+
+    // Obtener info completa del participante desde la vista
+    final participante = await _supabase
+        .from('vista_participantes_sesion')
+        .select()
+        .eq('id', participanteId)
+        .single();
+
+    return ParticipanteSesionModel.fromJson(participante);
+  }
+
+  /// Rechazar participante
+  Future<void> rechazarParticipante({
+    required String participanteId,
+  }) async {
+    final userId = _supabase.auth.currentUser?.id;
+
+    await _supabase
+        .from('participantes_sesion')
+        .update({
+          'estado_aprobacion': 'rechazado',
+          'aprobado_por': userId,
+        })
+        .eq('id', participanteId);
+  }
+
+  /// Stream de participantes (tiempo real)
+  ///
+  /// OPTIMIZACIÓN: Escucha la tabla base 'participantes_sesion' en lugar de VIEW
+  /// para recibir notificaciones en tiempo real confiables.
+  /// Enriquece datos con información de usuarios mediante query adicional.
+  Stream<List<ParticipanteSesionModel>> streamParticipantes(
+    String sesionId,
+  ) {
+    return _supabase
+        .from('participantes_sesion') // ← Tabla base, NO vista
+        .stream(primaryKey: ['id'])
+        .eq('sesion_id', sesionId)
+        .order('fecha_solicitud')
+        .asyncMap((participantesData) async {
+      // Manejar lista vacía
+      if (participantesData.isEmpty) {
+        return <ParticipanteSesionModel>[];
+      }
+
+      // Obtener IDs únicos de usuarios para fetch eficiente
+      final userIds = (participantesData as List)
+          .map((p) => p['usuario_id'] as String)
+          .toSet()
+          .toList();
+
+      // Fetch datos de usuarios en una sola query (batch)
+      final usuarios = await _supabase
+          .from('usuarios')
+          .select('id, nombre, apodo, foto_perfil_url, color_mapa')
+          .inFilter('id', userIds);
+
+      debugPrint('🔍 DEBUG Stream Participantes:');
+      debugPrint('   - Participantes en sesión: ${participantesData.length}');
+      debugPrint('   - Usuarios obtenidos: ${(usuarios as List).length}');
+      if ((usuarios as List).isNotEmpty) {
+        debugPrint('   - Primer usuario de ejemplo: ${usuarios[0]}');
+      }
+
+      // Crear map para lookup O(1)
+      final usuariosMap = <String, dynamic>{
+        for (final u in usuarios) u['id']: u
+      };
+
+      // Combinar datos de participantes con datos de usuarios
+      return participantesData.map((p) {
+        final usuario = usuariosMap[p['usuario_id']] ?? {};
+        debugPrint('   - Mapeando usuario ${p['usuario_id']}: nombre=${usuario['nombre']}, apodo=${usuario['apodo']}');
+        return ParticipanteSesionModel.fromJson({
+          ...p,
+          'nombre': usuario['nombre'],  // ✅ CORREGIDO: era 'nombre_usuario'
+          'apodo': usuario['apodo'],    // ✅ CORREGIDO: era 'apodo_usuario'
+          'foto_perfil_url': usuario['foto_perfil_url'],
+          'color_mapa': usuario['color_mapa'],
+        });
+      }).toList();
+    });
+  }
+
+  /// Verificar si usuario está aprobado en sesión
+  Future<bool> estaAprobadoEnSesion({
+    required String sesionId,
+    String? usuarioId,
+  }) async {
+    final userId = usuarioId ?? _supabase.auth.currentUser?.id;
+
+    if (userId == null) return false;
+
+    final response = await _supabase
+        .from('participantes_sesion')
+        .select('estado_aprobacion')
+        .eq('sesion_id', sesionId)
+        .eq('usuario_id', userId)
+        .maybeSingle();
+
+    if (response == null) return false;
+
+    return response['estado_aprobacion'] == 'aprobado';
+  }
+
+  /// Verificar si usuario es líder de la sesión
+  Future<bool> esLiderDeSesion({
+    required String sesionId,
+    String? usuarioId,
+  }) async {
+    final userId = usuarioId ?? _supabase.auth.currentUser?.id;
+
+    if (userId == null) return false;
+
+    final response = await _supabase
+        .from('sesiones_ruta_activa')
+        .select('iniciada_por')
+        .eq('id', sesionId)
+        .single();
+
+    return response['iniciada_por'] == userId;
+  }
+
+  /// Pausar/reanudar tracking de participante
+  Future<void> cambiarEstadoTracking({
+    required String sesionId,
+    required bool activo,
+  }) async {
+    final userId = _supabase.auth.currentUser?.id;
+
+    if (userId == null) {
+      throw Exception('Usuario no autenticado');
+    }
+
+    await _supabase
+        .from('participantes_sesion')
+        .update({
+          'tracking_activo': activo,
+        })
+        .eq('sesion_id', sesionId)
+        .eq('usuario_id', userId);
+  }
+
+  // ========================================
+  // MÉTODOS DE RUTAS COMPARTIDAS EN SESIÓN
+  // ========================================
+
+  /// Compartir ruta con la sesión (solo líder)
+  Future<void> compartirRuta({
+    required String sesionId,
+    required double destinoLat,
+    required double destinoLng,
+    String? destinoNombre,
+  }) async {
+    final userId = _supabase.auth.currentUser?.id;
+
+    if (userId == null) {
+      throw Exception('Usuario no autenticado');
+    }
+
+    // Eliminar ruta anterior si existe (solo una ruta activa por sesión)
+    await _supabase
+        .from('rutas_sesion')
+        .delete()
+        .eq('sesion_id', sesionId);
+
+    // Insertar nueva ruta
+    await _supabase.from('rutas_sesion').insert({
+      'sesion_id': sesionId,
+      'destino_lat': destinoLat,
+      'destino_lng': destinoLng,
+      'destino_nombre': destinoNombre,
+      'compartida_por': userId,
+    });
+  }
+
+  /// Obtener ruta compartida de una sesión
+  Future<Map<String, dynamic>?> obtenerRutaCompartida(String sesionId) async {
+    try {
+      final response = await _supabase
+          .from('rutas_sesion')
+          .select()
+          .eq('sesion_id', sesionId)
+          .maybeSingle();
+
+      return response;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Stream de ruta compartida (tiempo real)
+  Stream<Map<String, dynamic>?> streamRutaCompartida(String sesionId) {
+    debugPrint('📡 Creando stream de ruta compartida para sesión: $sesionId');
+
+    // IMPORTANTE: No usar .eq() en el stream porque no emite cuando se elimina
+    // el último registro. En su lugar, filtramos manualmente después.
+    return _supabase
+        .from('rutas_sesion')
+        .stream(primaryKey: ['id'])
+        .map((allData) {
+          // Filtrar manualmente las rutas de esta sesión
+          final rutasSesion = allData.where((ruta) =>
+            ruta['sesion_id'] == sesionId
+          ).toList();
+
+          if (rutasSesion.isEmpty) {
+            debugPrint('📡 Stream: No hay ruta para sesión $sesionId (emitiendo null)');
+            return null;
+          }
+
+          debugPrint('📡 Stream: Ruta encontrada para sesión $sesionId');
+          return rutasSesion.first as Map<String, dynamic>;
+        });
+  }
+
+  /// Eliminar ruta compartida
+  Future<void> eliminarRutaCompartida(String sesionId) async {
+    debugPrint('🗑️ Eliminando ruta compartida de sesión: $sesionId');
+    await _supabase
+        .from('rutas_sesion')
+        .delete()
+        .eq('sesion_id', sesionId);
+    debugPrint('✅ DELETE ejecutado en rutas_sesion');
   }
 
   // ========================================

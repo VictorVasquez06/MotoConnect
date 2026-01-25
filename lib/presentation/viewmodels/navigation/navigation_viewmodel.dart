@@ -17,6 +17,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/models/navigation_session.dart';
 import '../../../data/models/navigation_step.dart';
 import '../../../domain/usecases/navigation/start_navigation_usecase.dart';
@@ -26,6 +27,7 @@ import '../../../domain/usecases/navigation/resume_navigation_usecase.dart';
 import '../../../domain/usecases/navigation/end_navigation_usecase.dart';
 import '../../../domain/usecases/navigation/recalculate_route_usecase.dart';
 import '../../../services/location_tracking_service.dart';
+import '../../../services/navigation_voice_service.dart';
 
 class NavigationViewModel extends ChangeNotifier {
   // ========================================
@@ -39,6 +41,7 @@ class NavigationViewModel extends ChangeNotifier {
   final EndNavigationUseCase _endNavigationUseCase;
   final RecalculateRouteUseCase _recalculateRouteUseCase;
   final LocationTrackingService _locationService;
+  final NavigationVoiceService _voiceService;
 
   // ========================================
   // ESTADO
@@ -55,6 +58,9 @@ class NavigationViewModel extends ChangeNotifier {
 
   /// Stream subscription de ubicación
   StreamSubscription<Position>? _locationSubscription;
+
+  /// Timer para anuncios periódicos de progreso
+  Timer? _progressAnnouncementTimer;
 
   /// Indica si está calculando ruta
   bool _isCalculating = false;
@@ -74,13 +80,15 @@ class NavigationViewModel extends ChangeNotifier {
     required EndNavigationUseCase endNavigationUseCase,
     required RecalculateRouteUseCase recalculateRouteUseCase,
     required LocationTrackingService locationService,
+    required NavigationVoiceService voiceService,
   })  : _startNavigationUseCase = startNavigationUseCase,
         _updateProgressUseCase = updateProgressUseCase,
         _pauseNavigationUseCase = pauseNavigationUseCase,
         _resumeNavigationUseCase = resumeNavigationUseCase,
         _endNavigationUseCase = endNavigationUseCase,
         _recalculateRouteUseCase = recalculateRouteUseCase,
-        _locationService = locationService;
+        _locationService = locationService,
+        _voiceService = voiceService;
 
   // ========================================
   // GETTERS PÚBLICOS
@@ -170,8 +178,33 @@ class NavigationViewModel extends ChangeNotifier {
       _isCalculating = false;
       notifyListeners();
 
+      // Inicializar voz
+      await _voiceService.initialize();
+
+      // Anunciar primera instrucción
+      if (_currentSession!.currentStep != null) {
+        await _voiceService.announceInstruction(
+          _currentSession!.currentStep!.instruction,
+          _currentSession!.currentStep!.distanceText,
+          stepIndex: _currentSession!.currentStepIndex,
+        );
+      }
+
       // Iniciar tracking de ubicación
       await _startLocationTracking();
+
+      // Iniciar anuncios periódicos cada 2 minutos
+      _progressAnnouncementTimer = Timer.periodic(
+        const Duration(minutes: 2),
+        (timer) {
+          if (_currentSession != null && isNavigating) {
+            _voiceService.announceProgress(
+              _currentSession!.remainingDistanceText,
+              _currentSession!.remainingDurationText,
+            );
+          }
+        },
+      );
     } catch (e) {
       _errorMessage = 'Error al iniciar navegación: ${e.toString()}';
       _status = NavigationStatus.cancelled;
@@ -297,12 +330,46 @@ class NavigationViewModel extends ChangeNotifier {
 
       _lastKnownLocation = currentLocation;
 
+      // Guardar índice de paso anterior para detectar cambios
+      final previousStepIndex = _currentSession!.currentStepIndex;
+
       // Actualizar progreso
       _currentSession = await _updateProgressUseCase.execute(
         currentSession: _currentSession!,
         currentLocation: currentLocation,
         currentSpeedKmh: currentSpeedKmh,
       );
+
+      // Detectar cambio de paso y anunciar nueva instrucción
+      if (_currentSession!.currentStepIndex != previousStepIndex) {
+        if (_currentSession!.currentStep != null) {
+          await _voiceService.announceInstruction(
+            _currentSession!.currentStep!.instruction,
+            _currentSession!.currentStep!.distanceText,
+            stepIndex: _currentSession!.currentStepIndex,
+          );
+        }
+      }
+
+      // Alertas de proximidad a giros
+      if (_currentSession!.currentStep != null) {
+        final distanceToStep = _currentSession!.currentStep!.distanceMeters;
+
+        // Alerta a 200m
+        if (distanceToStep <= 200 && distanceToStep > 150) {
+          await _voiceService.announceProximityAlert(
+            _currentSession!.currentStep!.instruction,
+            200,
+          );
+        }
+        // Alerta a 100m
+        else if (distanceToStep <= 100 && distanceToStep > 50) {
+          await _voiceService.announceProximityAlert(
+            _currentSession!.currentStep!.instruction,
+            100,
+          );
+        }
+      }
 
       // Verificar si llegó al destino
       if (_currentSession!.isLastStep) {
@@ -313,9 +380,17 @@ class NavigationViewModel extends ChangeNotifier {
           _currentSession!.destination.longitude,
         );
 
-        // Si está a menos de 30 metros del destino, finalizar
+        // Si está a menos de 30 metros del destino, marcar como completado
         if (distanceToEnd < 30.0) {
-          await endNavigation(completed: true);
+          // Anunciar llegada
+          await _voiceService.announceArrival();
+
+          // Cambiar estado a completado (NO llamar endNavigation)
+          _status = NavigationStatus.completed;
+          await _locationSubscription?.cancel();
+          _locationSubscription = null;
+          _progressAnnouncementTimer?.cancel();
+          notifyListeners();
           return;
         }
       }
@@ -330,9 +405,53 @@ class NavigationViewModel extends ChangeNotifier {
   // LIFECYCLE
   // ========================================
 
+  /// Guarda la ruta completada en Supabase
+  ///
+  /// [routeName] - Nombre de la ruta
+  /// [routeDescription] - Descripción opcional
+  Future<void> saveCompletedRoute({
+    required String routeName,
+    String? routeDescription,
+  }) async {
+    if (_currentSession == null || !isCompleted) {
+      throw Exception('No hay sesión completada para guardar');
+    }
+
+    final uid = Supabase.instance.client.auth.currentUser?.id;
+    if (uid == null) {
+      throw Exception('Usuario no autenticado');
+    }
+
+    // Convertir polyline a JSON
+    final puntosJson = _currentSession!.completePolyline
+        .map((p) => {'lat': p.latitude, 'lng': p.longitude})
+        .toList();
+
+    // Calcular métricas reales
+    final distanciaKm = _currentSession!.totalDistanceMeters / 1000.0;
+    final duracionMinutos = _currentSession!.elapsedTime.inMinutes;
+
+    // Guardar en Supabase
+    await Supabase.instance.client.from('rutas_realizadas').insert({
+      'usuario_id': uid,
+      'nombre_ruta': routeName,
+      'fecha': DateTime.now().toIso8601String(),
+      'puntos': puntosJson,
+      'distancia_km': distanciaKm,
+      'duracion_minutos': duracionMinutos,
+      'imagen_url': null,
+      'descripcion_ruta':
+          routeDescription?.isEmpty == true ? null : routeDescription,
+    });
+
+    debugPrint('Ruta guardada: $routeName ($distanciaKm km, $duracionMinutos min)');
+  }
+
   @override
   void dispose() {
     _locationSubscription?.cancel();
+    _progressAnnouncementTimer?.cancel();
+    _voiceService.dispose();
     super.dispose();
   }
 }

@@ -13,6 +13,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../viewmodels/navigation/navigation_viewmodel.dart';
 import '../../widgets/navigation/navigation_panel.dart';
 import '../../widgets/navigation/navigation_controls.dart';
+import '../../widgets/navigation/navigation_summary_dialog.dart';
 import '../../../data/models/navigation_session.dart';
 import '../../../domain/usecases/navigation/start_navigation_usecase.dart';
 import '../../../domain/usecases/navigation/update_navigation_progress_usecase.dart';
@@ -24,6 +25,7 @@ import '../../../data/services/navigation/google_directions_service.dart';
 import '../../../data/services/navigation/navigation_tracking_service.dart';
 import '../../../data/repositories/navigation_repository.dart';
 import '../../../services/location_tracking_service.dart';
+import '../../../services/navigation_voice_service.dart';
 import '../../../core/constants/api_constants.dart';
 
 class NavigationScreen extends StatefulWidget {
@@ -113,6 +115,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
           locationService: locationService,
         );
 
+        // Crear servicio de voz
+        final voiceService = NavigationVoiceService();
+
         // Crear ViewModel
         final viewModel = NavigationViewModel(
           startNavigationUseCase: startNavigationUseCase,
@@ -122,6 +127,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
           endNavigationUseCase: endNavigationUseCase,
           recalculateRouteUseCase: recalculateRouteUseCase,
           locationService: locationService,
+          voiceService: voiceService,
         );
 
         // Iniciar navegación automáticamente
@@ -262,30 +268,127 @@ class _NavigationScreenState extends State<NavigationScreen> {
   }
 
   Widget _buildCompletedScreen() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.check_circle,
-            size: 64,
-            color: Colors.green,
+    final vm = Provider.of<NavigationViewModel>(context, listen: false);
+
+    return Stack(
+      children: [
+        // Mapa de fondo con la ruta completada
+        _NavigationMap(
+          onMapCreated: (controller) {
+            _mapController = controller;
+          },
+        ),
+
+        // Overlay oscuro
+        Container(
+          color: Colors.black.withOpacity(0.3),
+        ),
+
+        // Bottom sheet de resumen
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: NavigationSummaryBottomSheet(
+            session: vm.currentSession!,
+            onClose: () {
+              Navigator.pop(context);
+            },
+            onSave: () async {
+              final result = await _showSaveRouteDialog(context);
+              if (result != null && mounted) {
+                try {
+                  await vm.saveCompletedRoute(
+                    routeName: result['nombre']!,
+                    routeDescription: result['descripcion'],
+                  );
+
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Ruta guardada correctamente'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    Navigator.pop(context);
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error al guardar: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              }
+            },
           ),
-          const SizedBox(height: 16),
-          const Text(
-            '¡Has llegado a tu destino!',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+        ),
+      ],
+    );
+  }
+
+  Future<Map<String, String>?> _showSaveRouteDialog(
+      BuildContext context) async {
+    final TextEditingController nombreController = TextEditingController();
+    final TextEditingController descripcionController = TextEditingController();
+
+    return showDialog<Map<String, String>>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Guardar Ruta'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nombreController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: "Nombre*",
+                  hintText: "Dale un nombre a tu ruta",
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: descripcionController,
+                decoration: const InputDecoration(
+                  labelText: "Descripción (Opcional)",
+                  hintText: "Añade detalles si quieres...",
+                ),
+                maxLines: 2,
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.pop(context),
             ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Finalizar'),
-          ),
-        ],
-      ),
+            ElevatedButton(
+              child: const Text('Guardar'),
+              onPressed: () {
+                final nombre = nombreController.text.trim();
+                final descripcion = descripcionController.text.trim();
+                if (nombre.isNotEmpty) {
+                  Navigator.pop(context, {
+                    'nombre': nombre,
+                    'descripcion': descripcion,
+                  });
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("El nombre no puede estar vacío."),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -12,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/config/supabase_config.dart';
 import '../../models/user_model.dart';
+import '../../../utils/map_colors.dart';
 
 /// Excepción personalizada para errores de autenticación
 class AuthException implements Exception {
@@ -98,11 +99,15 @@ class AuthApiService {
       // Crear el perfil del usuario en la tabla usuarios
       // Esto es un backup por si el trigger de Supabase falla
       try {
+        // Generar color aleatorio para el usuario
+        final colorMapa = MapColors.generarColorAleatorio();
+
         await _supabase.from('usuarios').upsert({
           'id': response.user!.id,
           'correo': email,
           'nombre': nombre,
           'modelo_moto': null,
+          'color_mapa': colorMapa,
         });
       } catch (e) {
         // Si falla, el trigger debería haberlo creado
@@ -192,11 +197,15 @@ class AuthApiService {
       // Crear el perfil del usuario en la tabla usuarios si es un nuevo usuario
       // Esto es un backup por si el trigger de Supabase falla
       try {
+        // Generar color aleatorio para el usuario
+        final colorMapa = MapColors.generarColorAleatorio();
+
         await _supabase.from('usuarios').upsert({
           'id': user.id,
           'correo': user.email ?? '',
           'nombre': nombre,
           'modelo_moto': null,
+          'color_mapa': colorMapa,
         });
       } catch (e) {
         // Si falla, el trigger debería haberlo creado o el usuario ya existe

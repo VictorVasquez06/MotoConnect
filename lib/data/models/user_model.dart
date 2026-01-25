@@ -27,6 +27,9 @@ class UserModel {
   /// Apodo del usuario que se muestra en el mapa durante rutas grupales (opcional)
   final String? apodo;
 
+  /// Índice del color del marcador en el mapa (0-9)
+  final int colorMapa;
+
   /// Constructor
   const UserModel({
     required this.id,
@@ -35,6 +38,7 @@ class UserModel {
     this.modeloMoto,
     this.fotoPerfil,
     this.apodo,
+    this.colorMapa = 0,
   });
 
   /// Crea una instancia desde JSON
@@ -46,6 +50,7 @@ class UserModel {
       modeloMoto: json['modelo_moto'] as String?,
       fotoPerfil: json['foto_perfil_url'] as String?,
       apodo: json['apodo'] as String?,
+      colorMapa: json['color_mapa'] as int? ?? 0,
     );
   }
 
@@ -58,6 +63,7 @@ class UserModel {
       'modelo_moto': modeloMoto,
       'foto_perfil_url': fotoPerfil,
       'apodo': apodo,
+      'color_mapa': colorMapa,
     };
   }
 
@@ -69,6 +75,7 @@ class UserModel {
     String? modeloMoto,
     String? fotoPerfil,
     String? apodo,
+    int? colorMapa,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -77,6 +84,7 @@ class UserModel {
       modeloMoto: modeloMoto ?? this.modeloMoto,
       fotoPerfil: fotoPerfil ?? this.fotoPerfil,
       apodo: apodo ?? this.apodo,
+      colorMapa: colorMapa ?? this.colorMapa,
     );
   }
 }
