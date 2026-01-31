@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(Out-File -FilePath \"analyze_output.txt\" -Encoding UTF8)",
+      "Bash(analyze_output.txt)",
+      "Bash(findstr:*)",
+      "Bash(tee:*)",
+      "Bash(nul)",
+      "Bash(dir:*)",
+      "Bash(del \"C:\\Users\\VictorVasquez\\Documents\\MotoConnect\\lib\\presentation\\widgets\\location_selector_field.dart\")",
+      "Bash(Select-String -Pattern \"error|warning\")",
+      "Bash(Select-Object -First 20)",
+      "Bash(Select-String -Pattern \"navigation_panel|navigation_screen|error\" -Context 0,2)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

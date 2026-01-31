@@ -1,0 +1,101 @@
+Analyzing MotoConnect...                                        
+
+   info - Angle brackets will be interpreted as HTML - lib\data\models\directions_response.dart:5:22 - unintended_html_in_doc_comment
+   info - Angle brackets will be interpreted as HTML - lib\data\models\directions_response.dart:6:24 - unintended_html_in_doc_comment
+   info - Angle brackets will be interpreted as HTML - lib\data\models\directions_response.dart:7:29 - unintended_html_in_doc_comment
+warning - Unnecessary type check; the result is always 'true' - lib\data\repositories\taller_repository.dart:232:11 - unnecessary_type_check
+   info - Don't invoke 'print' in production code - lib\data\services\api\auth_api_service.dart:110:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\services\api\auth_api_service.dart:204:9 - avoid_print
+warning - The name sqrt is shown, but isn't used - lib\data\services\navigation\navigation_tracking_service.dart:11:35 - unused_shown_name
+   info - The constant name 'PROXIMITY_THRESHOLD_METERS' isn't a lowerCamelCase identifier - lib\data\services\navigation\navigation_tracking_service.dart:22:23 - constant_identifier_names
+   info - The constant name 'OFF_ROUTE_THRESHOLD_METERS' isn't a lowerCamelCase identifier - lib\data\services\navigation\navigation_tracking_service.dart:25:23 - constant_identifier_names
+   info - The constant name 'NEXT_TURN_ALERT_METERS' isn't a lowerCamelCase identifier - lib\data\services\navigation\navigation_tracking_service.dart:28:23 - constant_identifier_names
+   info - The constant name 'ETA_CORRECTION_FACTOR' isn't a lowerCamelCase identifier - lib\data\services\navigation\navigation_tracking_service.dart:31:23 - constant_identifier_names
+   info - The constant name 'MIN_SPEED_FOR_ETA_KMH' isn't a lowerCamelCase identifier - lib\data\services\navigation\navigation_tracking_service.dart:34:23 - constant_identifier_names
+warning - The operand can't be 'null', so the condition is always 'true' - lib\domain\usecases\events\get_event_details_usecase.dart:157:20 - unnecessary_null_comparison
+warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\events\get_event_details_usecase.dart:159:35 - unnecessary_non_null_assertion
+warning - The value of the local variable 'category' isn't used - lib\domain\usecases\events\get_events_usecase.dart:103:13 - unused_local_variable
+warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\events\join_event_usecase.dart:102:40 - unnecessary_non_null_assertion
+warning - The operand can't be 'null', so the condition is always 'true' - lib\domain\usecases\events\join_event_usecase.dart:130:20 - unnecessary_null_comparison
+warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\events\join_event_usecase.dart:130:41 - unnecessary_non_null_assertion
+   info - Uses 'await' on an instance of 'void', which is not a subtype of 'Future' - lib\domain\usecases\navigation\pause_navigation_usecase.dart:27:7 - await_only_futures
+  error - This expression has a type of 'void' so its value can't be used - lib\domain\usecases\navigation\pause_navigation_usecase.dart:27:30 - use_of_void_result
+warning - Unused import: 'package:google_maps_flutter/google_maps_flutter.dart' - lib\domain\usecases\navigation\recalculate_route_usecase.dart:10:8 - unused_import
+   info - Uses 'await' on an instance of 'void', which is not a subtype of 'Future' - lib\domain\usecases\navigation\resume_navigation_usecase.dart:27:7 - await_only_futures
+  error - This expression has a type of 'void' so its value can't be used - lib\domain\usecases\navigation\resume_navigation_usecase.dart:27:30 - use_of_void_result
+warning - Unused import: '../../../data/models/navigation_step.dart' - lib\domain\usecases\navigation\start_navigation_usecase.dart:13:8 - unused_import
+warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\delete_route_usecase.dart:274:34 - dead_null_aware_expression
+warning - The operand can't be 'null', so the condition is always 'false' - lib\domain\usecases\routes\get_routes_usecase.dart:256:27 - unnecessary_null_comparison
+warning - The operand can't be 'null', so the condition is always 'false' - lib\domain\usecases\routes\get_routes_usecase.dart:256:50 - unnecessary_null_comparison
+warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\routes\get_routes_usecase.dart:257:29 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\routes\get_routes_usecase.dart:257:52 - unnecessary_non_null_assertion
+warning - The operand can't be 'null', so the condition is always 'true' - lib\domain\usecases\routes\get_saved_routes_usecase.dart:57:18 - unnecessary_null_comparison
+warning - The operand can't be 'null', so the condition is always 'true' - lib\domain\usecases\routes\get_saved_routes_usecase.dart:60:17 - unnecessary_null_comparison
+warning - The receiver can't be null, so the null-aware operator '?.' is unnecessary - lib\domain\usecases\routes\get_saved_routes_usecase.dart:230:40 - invalid_null_aware_operator
+warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\routes\get_saved_routes_usecase.dart:327:19 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\domain\usecases\routes\get_saved_routes_usecase.dart:331:19 - unnecessary_non_null_assertion
+warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\get_saved_routes_usecase.dart:360:35 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\get_saved_routes_usecase.dart:361:35 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\get_saved_routes_usecase.dart:370:40 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\domain\usecases\routes\get_saved_routes_usecase.dart:371:40 - dead_null_aware_expression
+   info - Angle brackets will be interpreted as HTML - lib\domain\usecases\routes\save_route_usecase.dart:26:24 - unintended_html_in_doc_comment
+   info - Angle brackets will be interpreted as HTML - lib\domain\usecases\routes\save_route_usecase.dart:27:22 - unintended_html_in_doc_comment
+   info - Angle brackets will be interpreted as HTML - lib\domain\usecases\routes\save_route_usecase.dart:28:24 - unintended_html_in_doc_comment
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\auth\login_screen.dart:179:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\auth\login_screen.dart:192:60 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\presentation\views\community\community_screen.dart:79:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\community\community_screen.dart:121:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\community\community_screen.dart:144:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\community\community_screen.dart:176:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\community\community_screen.dart:294:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\community\community_screen.dart:354:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\community\community_screen.dart:429:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\community\community_screen.dart:509:31 - avoid_print
+warning - The left operand can't be null, so the right operand is never executed - lib\presentation\views\community\post_detail_screen.dart:218:42 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\presentation\views\community\post_detail_screen.dart:227:45 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\presentation\views\community\post_detail_screen.dart:286:51 - dead_null_aware_expression
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\presentation\views\events\create_event_screen.dart:536:25 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\events\event_detail_screen.dart:298:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\events\event_detail_screen.dart:314:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\events\event_detail_screen.dart:680:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\events\event_detail_screen.dart:714:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\events\events_screen.dart:206:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\views\events\events_screen.dart:229:58 - deprecated_member_use
+warning - Unused import: '../../../data/models/navigation_session.dart' - lib\presentation\views\navigation\navigation_screen.dart:16:8 - unused_import
+warning - The value of the field '_mapController' isn't used - lib\presentation\views\navigation\navigation_screen.dart:46:24 - unused_field
+   info - Don't invoke 'print' in production code - lib\presentation\views\profile\profile_screen.dart:56:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\profile\profile_screen.dart:93:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\profile\profile_screen.dart:107:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\profile\profile_screen.dart:167:9 - avoid_print
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\views\profile\profile_screen.dart:574:33 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\presentation\views\routes\map_picker_screen.dart:51:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\routes\map_picker_screen.dart:89:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\routes\map_picker_screen.dart:97:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\routes\map_picker_screen.dart:181:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\routes\rutas_screen.dart:136:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\presentation\views\routes\rutas_screen.dart:422:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\presentation\views\routes\rutas_screen.dart:427:11 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\presentation\views\routes\rutas_screen.dart:431:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\routes\rutas_screen.dart:491:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\routes\rutas_screen.dart:545:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\routes\rutas_screen.dart:576:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\routes\saved_routes_screen.dart:45:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\presentation\views\routes\saved_routes_screen.dart:93:9 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\presentation\views\routes\saved_routes_screen.dart:94:30 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\presentation\views\routes\saved_routes_screen.dart:176:7 - avoid_print
+   info - The 'child' argument should be last in widget constructor invocations - lib\presentation\widgets\navigation\navigation_controls.dart:38:17 - sort_child_properties_last
+   info - The 'child' argument should be last in widget constructor invocations - lib\presentation\widgets\navigation\navigation_controls.dart:50:17 - sort_child_properties_last
+   info - The 'child' argument should be last in widget constructor invocations - lib\presentation\widgets\navigation\navigation_controls.dart:65:17 - sort_child_properties_last
+warning - Unused import: 'package:intl/intl.dart' - lib\presentation\widgets\navigation\navigation_panel.dart:13:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\login_screen.dart:320:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\login_screen.dart:337:49 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\services\storage_service.dart:68:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\storage_service.dart:94:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\storage_service.dart:112:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\storage_service.dart:133:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\storage_service.dart:152:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\storage_service.dart:239:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\storage_service.dart:270:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\storage_service.dart:298:7 - avoid_print
+
+97 issues found. (ran in 85.0s)
