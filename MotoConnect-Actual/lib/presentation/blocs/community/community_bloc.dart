@@ -233,7 +233,9 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
       final updatedPosts =
           currentPosts.map((post) {
             if (post.id == event.postId) {
-              final updatedComments = [...(post.comments ?? []), newComment];
+              final updatedComments = List<CommentModel>.from(
+                post.comments ?? [],
+              )..add(newComment);
               return post.copyWith(
                 commentsCount: post.commentsCount + 1,
                 comments: updatedComments,
