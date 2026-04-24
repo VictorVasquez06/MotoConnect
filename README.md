@@ -4,7 +4,7 @@ Aplicación móvil para motociclistas desarrollada como proyecto de grado — Te
 
 MotoConnect permite a los motociclistas planificar rutas, participar en eventos de rodada, conectarse con talleres mecánicos, compartir experiencias en comunidad y coordinar sesiones de ruta en grupo con seguimiento de ubicación en tiempo real.
 
-**Versión**: 1.2.1 (Build 1) — Rama: `MotoConnect_1.2.1`
+**Versión**: 1.2.5 (Build 1)
 **Plataforma**: Solo Android
 
 ---
